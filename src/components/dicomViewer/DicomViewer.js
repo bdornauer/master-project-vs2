@@ -1,15 +1,17 @@
 // https://javascriptimageviewer.wordpress.com/2019/03/25/displaying-dicom-images/
 //and dicom & react
-
+/*
 import cornerstone from 'cornerstone-core';
 import cornerstoneMath from 'cornerstone-math';
 import cornerstoneTools from 'cornerstone-tools';
 import cornerstoneWebImageLoader from "cornerstone-web-image-loader";
 import cornerstoneWADOImageLoader from "cornerstone-wado-image-loader"
 import cornerstoneFileImageLoader from "cornerstone-file-image-loader"
-import {Fragment, useEffect, useState} from "react";
+
 import Hammer from "hammerjs";
 import dicomParser from "dicom-parser"
+ */
+import {Fragment, useEffect, useState} from "react";
 import configurations from "./DicomViewerDefaultConfiguration"
 import Colors from "../Colors"
 import {Form, ListGroup, ListGroupItem} from "react-bootstrap";
