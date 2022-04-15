@@ -1,6 +1,4 @@
 import React from 'react';
-import ReactLoading from 'react-loading';
-
 import {useState} from "react";
 import speechIcon from "../assets/logos/speechIcon.svg"
 import keyboardIcon from "../assets/logos/keyboardIcon.svg"
@@ -62,7 +60,7 @@ export function Welcome() {
 
     return (
         <div className="Welcome">
-            <h1>Willkommen beim multimodalen, berührunglosen und Web-Dicom-Viewer!</h1>
+            <h1>Willkommen beim ersten multimodalen, berührunglosen Dicom-Web-Viewer!</h1>
             {/*<!--<ReactLoading type={"cubes"} height={'5%'} color="#000000"/>-->*/}
         <div>
             <div className="CardsContainer">
