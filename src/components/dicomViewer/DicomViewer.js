@@ -37,7 +37,52 @@ function DicomViewer(props) {
     const [brigthnessLevel, setBrigthnessLevel] = useState(1)
     const [saturationLevel, setSaturationLevel] = useState(1)
     const [isInverted, setIsInverted] = useState(true)
+    const [count, setCount] = useState(0);
 
+    let dicomElement, canvas;
+
+    useEffect(() => {
+        dicomElement = document.getElementById('dicomImage'); //the view of the the file
+        canvas = document.getElementsByClassName("cornerstone-canvas")[0] //the canvas element - to apply effects
+        cornerstone.enable(dicomElement);
+
+        loadDicomMouseTools(); //initialize tools for simple mouse navigation
+
+        async function startProcess(){
+            let image = await cornerstone.loadImage(configurations.exampleJPG);
+            await cornerstone.displayImage(dicomElement, image);
+            initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
+        }
+        startProcess()
+
+    }, [])
+
+    function loadDicomMouseTools() {
+        //panTool
+        const PanTool = cornerstoneTools.PanTool;
+        cornerstoneTools.addTool(PanTool)
+        cornerstoneTools.setToolActive('Pan', {mouseButtonMask: 1})
+
+        //active wheel zooming in and out
+        const ZoomMouseWheelTool = cornerstoneTools.ZoomMouseWheelTool;
+        cornerstoneTools.addTool(ZoomMouseWheelTool)
+        cornerstoneTools.setToolActive('ZoomMouseWheel', {mouseButtonMask: 2})
+
+        //contrast Tool
+        const WwwcTool = cornerstoneTools.WwwcTool;
+        cornerstoneTools.addTool(WwwcTool)
+        cornerstoneTools.setToolActive('Wwwc', {mouseButtonMask: 4})
+
+        //rotation Tool
+        const RotateTool = cornerstoneTools.RotateTool;
+        cornerstoneTools.addTool(RotateTool)
+        cornerstoneTools.setToolActive('Rotate', {mouseButtonMask: 8})
+    }
+
+    function initializeViewport(viewport) {
+        cornerstone.setViewport(dicomElement, viewport);
+        cornerstone.updateImage(dicomElement);
+    }
     return (
         <Fragment>
             <h3>Dicom Viewer</h3>
@@ -45,7 +90,7 @@ function DicomViewer(props) {
                 <Form style={{textAlign: "left"}}>
                     <Form.Label>Lade eine JPG, PNG oder ein DICOM-File hoch</Form.Label>
                     <Form.Group controlId="formFileSm">
-                        <Form.Control  type="file" size="sm"/> {/*onChange={setNewImage}*/}
+                        <Form.Control type="file" size="sm"/> {/*onChange={setNewImage}*/}
                     </Form.Group>
                 </Form>
                 <div id="dicomImage"
