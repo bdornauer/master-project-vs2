@@ -61,7 +61,7 @@ export function Welcome() {
     return (
         <div className="Welcome">
             <h1>Willkommen beim ersten multimodalen, berührunglosen Dicom-Web-Viewer!</h1>
-            {/*<!--<ReactLoading type={"cubes"} height={'5%'} color="#000000"/>-->*/}
+            {/*<ReactLoading type={"cubes"} height={'5%'} color="#000000"/>*/}
         <div>
             <div className="CardsContainer">
                 <Row>
