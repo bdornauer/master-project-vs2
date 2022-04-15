@@ -42,21 +42,20 @@ function DicomViewer(props) {
         canvas = document.getElementsByClassName("cornerstone-canvas")[0] //the canvas element - to apply effects
 
         if (!isCornerstoneLoaded) {
+            //initialize cornerstone
+            cornerstone.enable(dicomElement);
+            loadDicomMouseTools(); //initialize tools for simple mouse navigation
 
-        //initialize cornerstone
-        cornerstone.enable(dicomElement);
-        loadDicomMouseTools(); //initialize tools for simple mouse navigation
+            //load sample-image & update viewport
+            async function startProcess() {
+                let image = await cornerstone.loadImage(configurations.exampleJPG);
+                await cornerstone.displayImage(dicomElement, image);
+                initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
+            }
 
-        //load sample-image & update viewport
-        async function startProcess(){
-            let image = await cornerstone.loadImage(configurations.exampleJPG);
-            await cornerstone.displayImage(dicomElement, image);
-            initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
-        }
-        startProcess()
-
-        //finish loading process
-        setIsCornerstoneLoaded(true);
+            startProcess()
+            //finish loading process
+            setIsCornerstoneLoaded(true);
         } else {
             switch (props.selectedCommand) {
                 case "zoomIn":
@@ -229,6 +228,8 @@ function DicomViewer(props) {
             case "goUp":
                 currentViewport.translation.y += delta;
                 break;
+            default:
+                break;
         }
         cornerstone.setViewport(dicomElement, currentViewport);
         cornerstone.updateImage(dicomElement);
@@ -278,7 +279,7 @@ function DicomViewer(props) {
 
         if (fileType === "image/jpeg" || fileType === "image/png") {
             imageId = cornerstoneFileImageLoader.fileManager.add(file);
-        } else if(fileType === "application/dicom"){
+        } else if (fileType === "application/dicom") {
             imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
         }
 
@@ -310,7 +311,7 @@ function DicomViewer(props) {
                     <ListGroup>
                         <ListGroupItem>Saturation: {Math.round(saturationLevel * 100)}% </ListGroupItem>
                         <ListGroupItem>Brightness: {Math.round(brigthnessLevel * 100)}%</ListGroupItem>
-                        <ListGroupItem>Invert on: {isInverted == false ? "off" : "on"}</ListGroupItem>
+                        <ListGroupItem>Invert on: {isInverted === false ? "off" : "on"}</ListGroupItem>
                     </ListGroup>
                 </div>
             </div>
