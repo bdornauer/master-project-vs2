@@ -21,7 +21,7 @@ import {Form, ListGroup, ListGroupItem} from "react-bootstrap";
  * Loading the tools for the dicom-Viewer containing: cornerstoneTools, cornerstoneWebImageLoader (for Uri)), cornerstoneWADOImageLoader & dicomParser (for DICOM-Format),
  * cornerstoneFileImageLoader (for file upload), Hammerstone (for touch & mouse-control)
  */
-/**
+
 cornerstoneTools.external.cornerstone = cornerstone;
 cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
 cornerstoneWebImageLoader.external.cornerstone = cornerstone;
@@ -31,7 +31,6 @@ cornerstoneTools.external.Hammer = Hammer;
 cornerstoneWADOImageLoader.webWorkerManager.initialize(configurations.config);
 cornerstoneFileImageLoader.external.cornerstone = cornerstone;
 cornerstoneTools.init();
-*/
 
 function DicomViewer(props) {
     const [isCornerstoneLoaded, setIsCornerstoneLoaded] = useState(false)
