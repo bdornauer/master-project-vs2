@@ -11,6 +11,8 @@ import saturationMinus from "../icons/saturationMinus.svg";
 import saturationPlus from "../icons/saturationPlus.svg";
 import invert from "../icons/invert.svg";
 import cancel from "../icons/cancel.svg";
+import Colors from "../Colors";
+import colors from "../Colors";
 
 function drawIcon(ctx, icon, x, y, width, height) {
     let img = new Image();
@@ -73,6 +75,81 @@ export function predictionPositionToString(xPosition, yPosition) {
 export function containsPredictions(array) {
     return array !== undefined && array.length >= 1;
 }
+
+export function higlichtSection(highlighting, x, y, sectionWidth, sectionHeight, screenWidth, screenHeight) {
+    removeCanvasLayer(highlighting, screenWidth, screenHeight)
+    let ctx = highlighting.current.getContext('2d');
+    ctx.beginPath();
+    ctx.rect(x, y, sectionWidth, sectionHeight);
+    ctx.lineWidth = 0
+    ctx.fillStyle = colors.brightBlueSemiTransprerent;
+    ctx.fill();
+    ctx.stroke();
+}
+
+export function highlightSectionActive(gridSection, highlighting, screenWidth, screenHeight) {
+    const sectionWidth = screenWidth / 3;
+    const sectionHeight = screenHeight / 3;
+
+    switch (gridSection) {
+        case "topLeft":
+            higlichtSection(highlighting, 0, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        case "topCenter":
+            higlichtSection(highlighting, sectionWidth, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        case "topRight":
+            higlichtSection(highlighting, 2*sectionWidth, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        case "centerLeft":
+            higlichtSection(highlighting, 0, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        case "centerCenter":
+            higlichtSection(highlighting, sectionWidth, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        case "centerRight":
+            higlichtSection(highlighting, 2 * sectionWidth, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        case "bottomLeft":
+            higlichtSection(highlighting, 0, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        case "bottomCenter":
+            higlichtSection(highlighting, sectionWidth, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        case "bottomRight":
+            higlichtSection(highlighting, 2 * sectionWidth, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            break;
+        default:
+            removeCanvasLayer(highlighting,screenWidth, screenHeight);
+    }
+}
+
+
+export function removeCanvasLayer(canvas, screenWidth, screenHeight) {
+    let ctx = canvas.current.getContext('2d');
+    ctx.clearRect(0, 0, screenWidth, screenHeight);
+}
+
+export function drawGridOverlay(grid, screenWidth, screenHeight) {
+    let ctx = grid.current.getContext('2d');
+    let stepsWidth = screenWidth / 3;
+    let stepsHeight = screenHeight / 3;
+    ctx.beginPath();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = Colors.brightBlue;
+    //horiziontal lines
+    for (let i = 0; i < 4; i++) {
+        ctx.moveTo(stepsWidth * i, 0);
+        ctx.lineTo(stepsWidth * i, screenHeight);
+    }
+
+    //vertical lines
+    for (let i = 0; i < 4; i++) {
+        ctx.moveTo(0, stepsHeight * i);
+        ctx.lineTo(screenWidth, stepsHeight * i);
+    }
+    ctx.stroke();
+};
 
 /** closedHand means that the hand is open (a bit confusing)*/
 export function filterPinchAndClosedHandGesture(array) {

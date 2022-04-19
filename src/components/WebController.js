@@ -6,25 +6,25 @@ import CommandBar from "./commandBar/CommandBar";
 import {Header} from "./Header";
 import * as handTrack from 'handtrackjs';
 import {BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute} from "react-icons/bs";
-import colors from "./Colors";
-import Colors from "./Colors";
+
 //Icons
-//menu1
-//menu2
-import menu2 from './icons/menu1.svg'
 import zoomIn from './icons/ZoomIn.svg'
-import zoomOut from './icons/ZoomOut.svg'
-import arrowLeft from './icons/arrowLeft.svg'
-import arrowRight from './icons/arrowRight.svg'
-import arrowUp from './icons/arrowUp.svg'
-import arrowDown from './icons/arrowDown.svg'
-import contrastMinus from './icons/brightnessMinus.svg'
-import contrastPlus from './icons/brightnessPlus.svg'
-import saturationMinus from './icons/saturationMinus.svg'
-import saturationPlus from './icons/saturationPlus.svg'
 import invert from './icons/invert.svg'
 import cancel from './icons/cancel.svg'
-import {drawIcon, filterPinchAndClosedHandGesture, calculateCenterOfBBox, containsPredictions, positionInGrid, predictionPositionToString, drawIconsMenu1, drawIconsMenu2} from "./controllers/WebcamController";
+
+//Webcam
+import {
+    filterPinchAndClosedHandGesture,
+    calculateCenterOfBBox,
+    containsPredictions,
+    positionInGrid,
+    predictionPositionToString,
+    drawIconsMenu1,
+    drawIconsMenu2,
+    drawGridOverlay,
+    removeCanvasLayer,
+    highlightSectionActive
+} from "./controllers/WebcamController";
 
 export function WebController() {
 
@@ -36,7 +36,7 @@ export function WebController() {
 
     //Webcam
     const [currentPrediction, setCurrentPredictionString] = useState("")
-    const [screenWidth, setScreenWidht] = useState(640)
+    const [screenWidth, setScreenWidth] = useState(640)
     const [screenHeight, setScreenHeight] = useState(480)
     const [iconSize, setIconSize] = useState(70)
     const [showTime, setShowTime] = useState(70)
@@ -66,7 +66,7 @@ export function WebController() {
                 model = await handTrack.load(eyeTrackingSettings);
                 canvas2dContext = canvas.current.getContext('2d');
                 await handTrack.startVideo(video.current);
-                drawGridOverlay();
+                drawGridOverlay(grid, screenWidth, screenHeight);
                 drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight);
 
             }
@@ -83,42 +83,25 @@ export function WebController() {
         }, [webcamOn]
     )
 
-    /*
-    async function startWebcamForDetection() {
-        await setWebcamOn(true)
-        console.log(webcamOn)
-        model = await handTrack.load(eyeTrackingSettings);
-        canvas2dContext = canvas.current.getContext('2d');
-        await handTrack.startVideo(video.current);
-        drawGridOverlay();
-        drawIconsMenu1();
-        detectHandsInVideo();
-    }
-
-    async function stopWebcamForDetection() {
-        await setWebcamOn(false)
-        await handTrack.stopVideo();
-    }*/
-
     function detectHandsInVideo() {
         model.detect(video.current).then(predictions => {
-            const filtertedPredictions = filterPinchAndClosedHandGesture(predictions);
+            const filteredPredictions = filterPinchAndClosedHandGesture(predictions);
             //calculating the values to decide where
-            if (containsPredictions(filtertedPredictions)) {
-                const bBox = filtertedPredictions[0].bbox; //only get the first detected value
+            if (containsPredictions(filteredPredictions)) {
+                const bBox = filteredPredictions[0].bbox; //only get the first detected value
                 const centerOfBBox = calculateCenterOfBBox(bBox[0], bBox[1], bBox[2], bBox[3]) //position of pinch or closed Hand
-                const gridPosition = positionInGrid(centerOfBBox[0], centerOfBBox[1], screenWidth, screenHeight) //decided in 3x3 grid wehre gesture ist detected
+                const gridPosition = positionInGrid(centerOfBBox[0], centerOfBBox[1], screenWidth, screenHeight) //decided in 3x3 grid were gesture ist detected
                 timePassed = performance.now() - startTime;
                 setShowTime(timePassed);
-                controlCommandPalett(gridPosition);
-                highlightSectionActive(gridPosition)
+                controlCommandPalet(gridPosition);
+                highlightSectionActive(gridPosition, highlighting, screenWidth, screenHeight)
                 const positionString = predictionPositionToString(centerOfBBox[0], centerOfBBox[1])
                 setCurrentPredictionString("Position: " + positionString + " in Grid " + gridPosition);
             } else {
                 startTime = performance.now();
                 timePassed = 0
                 setShowTime(timePassed);
-                removeCanvasLayer(highlighting);
+                removeCanvasLayer(highlighting, screenWidth, screenHeight);
                 setCurrentPredictionString("Nothing detected");
             }
 
@@ -128,9 +111,8 @@ export function WebController() {
     }
 
 
-    function controlCommandPalett(gridSection) {
-        let selection = "Nothing";
-
+    function controlCommandPalet(gridSection) {
+        let selection = "";
         if (timePassed > 500) {
             startTime = performance.now();
             timePassed = 0
@@ -140,31 +122,31 @@ export function WebController() {
                         console.log("topLeft");
                         break;
                     case "topCenter":
-                        setSelectedCommand("goUp")
+                        selection ="goUp"
                         break;
                     case "topRight":
-                        setSelectedCommand("zoomIn")
+                        selection ="zoomIn"
                         break;
                     case "centerLeft":
-                        setSelectedCommand("goLeft")
+                        selection ="goLeft"
                         break;
                     case "centerCenter":
-                        removeCanvasLayer(iconsLayer)
+                        removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
                         drawIconsMenu2(iconsLayer, iconSize, screenWidth, screenHeight)
                         activeMenuNr = 2
                         break;
                     case "centerRight":
-                        setSelectedCommand("goRight")
-                        setSelectedCommand("cancel")
+                        selection ="goRight"
+                        selection ="cancel"
                         break;
                     case "bottomLeft":
-                        setSelectedCommand("brightnessDown")
+                        selection ="brightnessDown"
                         break;
                     case "bottomCenter":
-                        setSelectedCommand("goDown")
+                        selection ="goDown"
                         break;
                     case "bottomRight":
-                        setSelectedCommand("brightnessUp")
+                        selection ="brightnessUp"
                         break;
                     default:
                         break;
@@ -172,31 +154,28 @@ export function WebController() {
             } else {
                 switch (gridSection) {
                     case "topLeft":
-                        setSelectedCommand("saturationDown")
+                        selection ="saturationDown"
                         break;
                     case "topCenter":
 
                         break;
                     case "topRight":
-                        setSelectedCommand("saturationUp")
+                        selection ="saturationUp"
                         break;
                     case "centerLeft":
-                        setSelectedCommand("invert")
+                        selection ="invert"
                         break;
                     case "centerCenter":
-                        console.log("change menu 2")
-                        removeCanvasLayer(iconsLayer)
+                        removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
                         drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight)
                         activeMenuNr = 1
                         break;
                     case "centerRight":
-                        setSelectedCommand("cancel")
+                        selection ="cancel"
                         break;
                     case "bottomLeft":
-
                         break;
                     case "bottomCenter":
-
                         break;
                     case "bottomRight":
                         break;
@@ -206,121 +185,13 @@ export function WebController() {
             }
         }
 
+        setSelectedCommand(selection)
+
         setTimeout(() => {
             setSelectedCommand("");
         }, 200);
 
     }
-
-
-    function highlightSectionActive(gridSection) {
-        const sectionWidth = screenWidth / 3;
-        const sectionHeight = screenHeight / 3;
-
-        switch (gridSection) {
-            case "topLeft":
-                console.log(sectionWidth);
-                higlichtSection(0, 0, sectionWidth, sectionHeight)
-                break;
-            case "topCenter":
-                higlichtSection(sectionWidth, 0, sectionWidth, sectionHeight)
-                break;
-            case "topRight":
-                higlichtSection(2 * sectionWidth, 0, sectionWidth, sectionHeight)
-                break;
-            case "centerLeft":
-                higlichtSection(0, sectionHeight, sectionWidth, sectionHeight)
-                break;
-            case "centerCenter":
-                higlichtSection(sectionWidth, sectionHeight, sectionWidth, sectionHeight)
-                break;
-            case "centerRight":
-                higlichtSection(2 * sectionWidth, sectionHeight, sectionWidth, sectionHeight)
-                break;
-            case "bottomLeft":
-                higlichtSection(0, 2 * sectionHeight, sectionWidth, sectionHeight)
-                break;
-            case "bottomCenter":
-                higlichtSection(sectionWidth, 2 * sectionHeight, sectionWidth, sectionHeight)
-                break;
-            case "bottomRight":
-                higlichtSection(2 * sectionWidth, 2 * sectionHeight, sectionWidth, sectionHeight)
-                break;
-            default:
-                removeCanvasLayer(highlighting);
-        }
-    }
-
-    function higlichtSection(x, y, width, height) {
-        removeCanvasLayer(highlighting)
-        let ctx = highlighting.current.getContext('2d');
-        ctx.beginPath();
-        ctx.rect(x, y, width, height);
-        ctx.lineWidth = 0
-        ctx.fillStyle = colors.brightBlueSemiTransprerent;
-        ctx.fill();
-        ctx.stroke();
-    }
-
-    function removeCanvasLayer(canvas) {
-        let ctx = canvas.current.getContext('2d');
-        ctx.clearRect(0, 0, screenWidth, screenHeight);
-    }
-
-    function drawGridOverlay() {
-        let ctx = grid.current.getContext('2d');
-        let stepsWidth = screenWidth / 3;
-        let stepsHeight = screenHeight / 3;
-        ctx.beginPath();
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = Colors.brightBlue;
-        //horiziontal lines
-        for (let i = 0; i < 4; i++) {
-            ctx.moveTo(stepsWidth * i, 0);
-            ctx.lineTo(stepsWidth * i, screenHeight);
-        }
-
-        //vertical lines
-        for (let i = 0; i < 4; i++) {
-            ctx.moveTo(0, stepsHeight * i);
-            ctx.lineTo(screenWidth, stepsHeight * i);
-        }
-        ctx.stroke();
-    };
-
-/*
-    function drawIconsMenu1() {
-        let sectionVertical = screenHeight / 6;
-        let sectionHorizontal = screenWidth / 6;
-        let halfSizeIcon = iconSize / 2;
-        let ctx = iconsLayer.current.getContext('2d')
-        drawIcon(ctx, zoomOut, sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, arrowUp, 3 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, zoomIn, 5 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, arrowLeft, sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, menu2, 3 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, arrowRight, 5 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, contrastMinus, sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, arrowDown, 3 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, contrastPlus, 5 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-    }
-
-    function drawIconsMenu2() {
-        let sectionVertical = screenHeight / 6;
-        let sectionHorizontal = screenWidth / 6;
-        let halfSizeIcon = iconSize / 2;
-        let ctx = iconsLayer.current.getContext('2d')
-        drawIcon(ctx, saturationMinus, sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        //drawIcon(ctx, cancel, 3 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, saturationPlus, 5 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, invert, sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, menu2, 3 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        drawIcon(ctx, cancel, 5 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        //drawIcon(ctx, contrastMinus, sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-        //drawIcon(ctx, arrowDown, 3 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-        //drawIcon(ctx, contrastPlus, 5 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-    }
-*/
 
     /****************************************************************************************************
      * MOUSE Controller
@@ -355,7 +226,7 @@ export function WebController() {
             <Header/>
         </Row>
         <Row>
-            <CommandBar selectedCommand={selectedCommand}></CommandBar>
+            <CommandBar selectedCommand={selectedCommand}/>
             Selected command {selectedCommand}
         </Row>
         <Row>
