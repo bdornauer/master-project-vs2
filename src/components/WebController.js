@@ -24,7 +24,7 @@ import saturationMinus from './icons/saturationMinus.svg'
 import saturationPlus from './icons/saturationPlus.svg'
 import invert from './icons/invert.svg'
 import cancel from './icons/cancel.svg'
-import WebcamController from "./controllers/WebcamController";
+import {drawIcon, filterPinchAndClosedHandGesture, calculateCenterOfBBox, containsPredictions, positionInGrid, predictionPositionToString, drawIconsMenu1, drawIconsMenu2} from "./controllers/WebcamController";
 
 export function WebController() {
 
@@ -36,7 +36,6 @@ export function WebController() {
 
     //Webcam
     const [currentPrediction, setCurrentPredictionString] = useState("")
-    const [isCameraOn, setIsCameraOn] = useState(false)
     const [screenWidth, setScreenWidht] = useState(640)
     const [screenHeight, setScreenHeight] = useState(480)
     const [iconSize, setIconSize] = useState(70)
@@ -47,15 +46,13 @@ export function WebController() {
     const grid = useRef(null)
     const iconsLayer = useRef(null)
     const highlighting = useRef(null)
-    let canvas2dContext, model, activeMenuNr, startTime = 0, timePassed = 0;
-
-    //Micro
+    let canvas2dContext, model, activeMenuNr = 1, startTime = 0, timePassed = 0;
 
     //Settings
     KeyController.supressKey()
 
     /****************************************************************************************************
-     * WebCam Controller
+     * WEBCAM Controller
      *************************************************************************************************** */
     const eyeTrackingSettings = {
         flipHorizontal: true,   // flip e.g for video
@@ -63,7 +60,30 @@ export function WebController() {
         maxNumBoxes: 5,        // maximum number of boxes to detect
     }
 
+    useEffect(() => {
+            const start = async () => {
+                setWebcamOn(true)
+                model = await handTrack.load(eyeTrackingSettings);
+                canvas2dContext = canvas.current.getContext('2d');
+                await handTrack.startVideo(video.current);
+                drawGridOverlay();
+                drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight);
 
+            }
+            const stop = async () => {
+                setWebcamOn(false)
+                await handTrack.stopVideo();
+            }
+
+            if (webcamOn) {
+                start().then(() => detectHandsInVideo())
+            } else {
+                stop()
+            }
+        }, [webcamOn]
+    )
+
+    /*
     async function startWebcamForDetection() {
         await setWebcamOn(true)
         console.log(webcamOn)
@@ -78,22 +98,21 @@ export function WebController() {
     async function stopWebcamForDetection() {
         await setWebcamOn(false)
         await handTrack.stopVideo();
-    }
+    }*/
 
     function detectHandsInVideo() {
         model.detect(video.current).then(predictions => {
-            const filtertedPredictions = WebcamController.filterPinchAndClosedHandGesture(predictions);
-
+            const filtertedPredictions = filterPinchAndClosedHandGesture(predictions);
             //calculating the values to decide where
-            if (WebcamController.containsPredictions(filtertedPredictions)) {
+            if (containsPredictions(filtertedPredictions)) {
                 const bBox = filtertedPredictions[0].bbox; //only get the first detected value
-                const centerOfBBox = WebcamController.calculateCenterOfBBox(bBox[0], bBox[1], bBox[2], bBox[3]) //position of pinch or closed Hand
-                const gridPosition = WebcamController.positionInGrid(centerOfBBox[0], centerOfBBox[1],screenWidth, screenHeight) //decided in 3x3 grid wehre gesture ist detected
+                const centerOfBBox = calculateCenterOfBBox(bBox[0], bBox[1], bBox[2], bBox[3]) //position of pinch or closed Hand
+                const gridPosition = positionInGrid(centerOfBBox[0], centerOfBBox[1], screenWidth, screenHeight) //decided in 3x3 grid wehre gesture ist detected
                 timePassed = performance.now() - startTime;
                 setShowTime(timePassed);
                 controlCommandPalett(gridPosition);
                 highlightSectionActive(gridPosition)
-                const positionString = WebcamController.predictionPositionToString(centerOfBBox[0], centerOfBBox[1])
+                const positionString = predictionPositionToString(centerOfBBox[0], centerOfBBox[1])
                 setCurrentPredictionString("Position: " + positionString + " in Grid " + gridPosition);
             } else {
                 startTime = performance.now();
@@ -111,13 +130,14 @@ export function WebController() {
 
     function controlCommandPalett(gridSection) {
         let selection = "Nothing";
+
         if (timePassed > 500) {
             startTime = performance.now();
             timePassed = 0
             if (activeMenuNr === 1) {
                 switch (gridSection) {
                     case "topLeft":
-                        setSelectedCommand("zoomOut")
+                        console.log("topLeft");
                         break;
                     case "topCenter":
                         setSelectedCommand("goUp")
@@ -130,7 +150,7 @@ export function WebController() {
                         break;
                     case "centerCenter":
                         removeCanvasLayer(iconsLayer)
-                        drawIconsMenu2()
+                        drawIconsMenu2(iconsLayer, iconSize, screenWidth, screenHeight)
                         activeMenuNr = 2
                         break;
                     case "centerRight":
@@ -166,7 +186,7 @@ export function WebController() {
                     case "centerCenter":
                         console.log("change menu 2")
                         removeCanvasLayer(iconsLayer)
-                        drawIconsMenu1()
+                        drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight)
                         activeMenuNr = 1
                         break;
                     case "centerRight":
@@ -179,16 +199,18 @@ export function WebController() {
 
                         break;
                     case "bottomRight":
-
                         break;
                     default:
                         break;
                 }
             }
         }
-        setSelectedCommand("")
-    }
 
+        setTimeout(() => {
+            setSelectedCommand("");
+        }, 200);
+
+    }
 
 
     function highlightSectionActive(gridSection) {
@@ -266,21 +288,21 @@ export function WebController() {
         ctx.stroke();
     };
 
-
+/*
     function drawIconsMenu1() {
         let sectionVertical = screenHeight / 6;
         let sectionHorizontal = screenWidth / 6;
         let halfSizeIcon = iconSize / 2;
         let ctx = iconsLayer.current.getContext('2d')
-        WebcamController.drawIcon(ctx, zoomOut, sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, arrowUp, 3 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, zoomIn, 5 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, arrowLeft, sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, menu2, 3 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, arrowRight, 5 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, contrastMinus, sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, arrowDown, 3 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, contrastPlus, 5 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, zoomOut, sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, arrowUp, 3 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, zoomIn, 5 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, arrowLeft, sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, menu2, 3 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, arrowRight, 5 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, contrastMinus, sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, arrowDown, 3 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, contrastPlus, 5 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
     }
 
     function drawIconsMenu2() {
@@ -288,17 +310,17 @@ export function WebController() {
         let sectionHorizontal = screenWidth / 6;
         let halfSizeIcon = iconSize / 2;
         let ctx = iconsLayer.current.getContext('2d')
-        WebcamController.drawIcon(ctx, saturationMinus, sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, saturationMinus, sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
         //drawIcon(ctx, cancel, 3 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, saturationPlus, 5 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, invert, sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, menu2, 3 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-        WebcamController.drawIcon(ctx, cancel, 5 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, saturationPlus, 5 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, invert, sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, menu2, 3 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
+        drawIcon(ctx, cancel, 5 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
         //drawIcon(ctx, contrastMinus, sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
         //drawIcon(ctx, arrowDown, 3 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
         //drawIcon(ctx, contrastPlus, 5 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
     }
-
+*/
 
     /****************************************************************************************************
      * MOUSE Controller
@@ -308,9 +330,10 @@ export function WebController() {
      * @param e
      */
     function pressedKeyAction(pressedKey) {
+
         setTimeout(() => {
             setSelectedCommand("");
-        }, 200);
+        }, 20);
 
         let commandToKey = KeyController.keySelectionCommand(pressedKey.key);
         setSelectedCommand(commandToKey);
@@ -333,6 +356,7 @@ export function WebController() {
         </Row>
         <Row>
             <CommandBar selectedCommand={selectedCommand}></CommandBar>
+            Selected command {selectedCommand}
         </Row>
         <Row>
             <Col xs={6}>
@@ -346,7 +370,7 @@ export function WebController() {
                         </Button>
                         <Button variant="secondary"
                                 style={webcamOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
-                                onClick={isCameraOn ? stopWebcamForDetection : startWebcamForDetection}>
+                                onClick={() => webcamOn ? setWebcamOn(false) : setWebcamOn(true)}>
                             {webcamOn ? <BsCameraVideo/> : <BsCameraVideoOff/>}
                             Webcam
                         </Button>
