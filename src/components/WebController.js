@@ -1,16 +1,10 @@
 import {Button, ButtonGroup, Col, Container, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 import DicomViewer from "./dicomViewer/DicomViewer";
 import {useEffect, useRef, useState} from "react";
-import KeyController from "./controllers/KeyController";
 import CommandBar from "./commandBar/CommandBar";
 import {Header} from "./Header";
 import * as handTrack from 'handtrackjs';
 import {BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute} from "react-icons/bs";
-
-//Icons
-import zoomIn from './icons/ZoomIn.svg'
-import invert from './icons/invert.svg'
-import cancel from './icons/cancel.svg'
 
 //Webcam
 import {
@@ -25,6 +19,7 @@ import {
     removeCanvasLayer,
     highlightSectionActive
 } from "./controllers/WebcamController";
+import {keySelectionCommand, supressKey} from "./controllers/KeyController";
 
 export function WebController() {
 
@@ -36,10 +31,11 @@ export function WebController() {
 
     //Webcam
     const [currentPrediction, setCurrentPredictionString] = useState("")
-    const [screenWidth, setScreenWidth] = useState(640)
-    const [screenHeight, setScreenHeight] = useState(480)
-    const [iconSize, setIconSize] = useState(70)
+    const [screenWidth] = useState(640)
+    const [screenHeight] = useState(480)
+    const [iconSize] = useState(70)
     const [showTime, setShowTime] = useState(70)
+
 
     const video = useRef(null);
     const canvas = useRef(null)
@@ -47,9 +43,6 @@ export function WebController() {
     const iconsLayer = useRef(null)
     const highlighting = useRef(null)
     let canvas2dContext, model, activeMenuNr = 1, startTime = 0, timePassed = 0;
-
-    //Settings
-    KeyController.supressKey()
 
     /****************************************************************************************************
      * WEBCAM Controller
@@ -200,13 +193,16 @@ export function WebController() {
      * pressedKeyAction depended on the pressed key, the selectedCommand is set to the specific value
      * @param e
      */
+    //Settings
+    supressKey()
+
     function pressedKeyAction(pressedKey) {
 
         setTimeout(() => {
             setSelectedCommand("");
         }, 20);
 
-        let commandToKey = KeyController.keySelectionCommand(pressedKey.key);
+        let commandToKey = keySelectionCommand(pressedKey.key);
         setSelectedCommand(commandToKey);
     }
 
