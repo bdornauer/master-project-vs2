@@ -4,7 +4,9 @@ import {useEffect, useRef, useState} from "react";
 import CommandBar from "./commandBar/CommandBar";
 import {Header} from "./Header";
 import * as handTrack from 'handtrackjs';
-import {BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute} from "react-icons/bs";
+import {BsCameraVideo, BsCameraVideoOff, BsFillMicFill, BsFillMicMuteFill, BsMic, BsMicMute} from "react-icons/bs";
+import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
+import confirmSound from "../assets/confirm.wav"
 
 //Webcam
 import {
@@ -19,12 +21,21 @@ import {
     removeCanvasLayer,
     highlightSectionActive
 } from "./controllers/WebcamController";
+
 import {keySelectionCommand, supressKey} from "./controllers/KeyController";
+import {
+    containsSignalWord,
+    filterCommands,
+    transcriptToArray, transcriptToLowerCase
+} from "./controllers/MicroController";
+import useSound from "use-sound";
 
 export function WebController() {
+    const [play] = useSound(confirmSound );
 
     const [micOn, setMicOn] = useState(false);
     const [webcamOn, setWebcamOn] = useState(false);
+    const [infoTest, setInfoTest] = useState("missing");
 
     //General
     const [selectedCommand, setSelectedCommand] = useState("")
@@ -43,6 +54,42 @@ export function WebController() {
     const iconsLayer = useRef(null)
     const highlighting = useRef(null)
     let canvas2dContext, model, activeMenuNr = 1, startTime = 0, timePassed = 0;
+    /****************************************************************************************************
+     * MICRO Controller
+     *************************************************************************************************** */
+
+    const {
+        transcript,
+        listening,
+        resetTranscript,
+        browserSupportsSpeechRecognition
+    } = useSpeechRecognition();
+
+    function startListening() {
+        setMicOn(true);
+        SpeechRecognition.startListening({continuous: true});
+        //TODO: change possible settings: https://github.com/JamesBrill/react-speech-recognition/tree/8ecb6052949e47a3fae8c6978abb4253ee1d00f1
+    }
+
+    function stopListening() {
+        setMicOn(false);
+        SpeechRecognition.stopListening()
+        //TODO: change possible settings: https://github.com/JamesBrill/react-speech-recognition/tree/8ecb6052949e47a3fae8c6978abb4253ee1d00f1
+    }
+
+    useEffect(() => {
+        let stringTranscript = transcriptToLowerCase(transcript);
+        let arrayTranscript = transcriptToArray(stringTranscript);
+        let filteredArrayTranscript = filterCommands(arrayTranscript);
+
+        console.log(filteredArrayTranscript)
+
+        if(containsSignalWord(filteredArrayTranscript)){
+            play()
+        }
+
+        setInfoTest(filteredArrayTranscript)
+    }, [transcript]);
 
     /****************************************************************************************************
      * WEBCAM Controller
@@ -115,13 +162,13 @@ export function WebController() {
                         console.log("topLeft");
                         break;
                     case "topCenter":
-                        selection ="goUp"
+                        selection = "goUp"
                         break;
                     case "topRight":
-                        selection ="zoomIn"
+                        selection = "zoomIn"
                         break;
                     case "centerLeft":
-                        selection ="goLeft"
+                        selection = "goLeft"
                         break;
                     case "centerCenter":
                         removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
@@ -129,17 +176,17 @@ export function WebController() {
                         activeMenuNr = 2
                         break;
                     case "centerRight":
-                        selection ="goRight"
-                        selection ="cancel"
+                        selection = "goRight"
+                        selection = "cancel"
                         break;
                     case "bottomLeft":
-                        selection ="brightnessDown"
+                        selection = "brightnessDown"
                         break;
                     case "bottomCenter":
-                        selection ="goDown"
+                        selection = "goDown"
                         break;
                     case "bottomRight":
-                        selection ="brightnessUp"
+                        selection = "brightnessUp"
                         break;
                     default:
                         break;
@@ -147,16 +194,16 @@ export function WebController() {
             } else {
                 switch (gridSection) {
                     case "topLeft":
-                        selection ="saturationDown"
+                        selection = "saturationDown"
                         break;
                     case "topCenter":
 
                         break;
                     case "topRight":
-                        selection ="saturationUp"
+                        selection = "saturationUp"
                         break;
                     case "centerLeft":
-                        selection ="invert"
+                        selection = "invert"
                         break;
                     case "centerCenter":
                         removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
@@ -164,7 +211,7 @@ export function WebController() {
                         activeMenuNr = 1
                         break;
                     case "centerRight":
-                        selection ="cancel"
+                        selection = "cancel"
                         break;
                     case "bottomLeft":
                         break;
@@ -224,16 +271,21 @@ export function WebController() {
         <Row>
             <CommandBar selectedCommand={selectedCommand}/>
             Selected command {selectedCommand}
+            <div> MikroEingabe: {infoTest}</div>
+
         </Row>
         <Row>
+            <button
+                onClick={() => play()}
+            />
             <Col xs={6}>
                 <div style={{paddingLeft: "20%", paddingRight: "20%"}}>
                     <ButtonGroup className="mb-3">
                         <Button variant="secondary"
                                 style={micOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
-                                onClick={() => setMicOn(!micOn)}>
+                                onClick={() => micOn ? stopListening() : startListening()}>
                             {micOn ? <BsMic/> : <BsMicMute/>}
-                            Mikro
+                            Micro
                         </Button>
                         <Button variant="secondary"
                                 style={webcamOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
@@ -246,7 +298,10 @@ export function WebController() {
                         Webcam
                     </div>
                     <div>
-                        Mikrofon
+                        <div>
+                            <h2>Speech-Controller {listening ? <BsFillMicFill/> : <BsFillMicMuteFill/>}</h2>
+                            Transcript: {transcript}
+                        </div>
                         <div>
                             <div style={{
                                 position: "relative",
