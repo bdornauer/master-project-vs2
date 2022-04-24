@@ -25,13 +25,13 @@ import {
 import {keySelectionCommand, supressKey} from "./controllers/KeyController";
 import {
     containsSignalWord,
-    filterCommands,
+    filterCommands, getCommandToVoiceCommand,
     transcriptToArray, transcriptToLowerCase
 } from "./controllers/MicroController";
 import useSound from "use-sound";
 
 export function WebController() {
-    const [play] = useSound(confirmSound );
+    const [play] = useSound(confirmSound);
 
     const [micOn, setMicOn] = useState(false);
     const [webcamOn, setWebcamOn] = useState(false);
@@ -46,6 +46,9 @@ export function WebController() {
     const [screenHeight] = useState(480)
     const [iconSize] = useState(70)
     const [showTime, setShowTime] = useState(70)
+
+    //Micro
+    const [isSignalDetected, setIsSignalDetected] = useState(false)
 
 
     const video = useRef(null);
@@ -82,10 +85,20 @@ export function WebController() {
         let arrayTranscript = transcriptToArray(stringTranscript);
         let filteredArrayTranscript = filterCommands(arrayTranscript);
 
-        console.log(filteredArrayTranscript)
-
-        if(containsSignalWord(filteredArrayTranscript)){
+        console.log(arrayTranscript)
+        if (containsSignalWord(filteredArrayTranscript)) {
             play()
+            setIsSignalDetected(true)
+            resetTranscript();
+        } else {
+            if (arrayTranscript.length > 5) {
+                resetTranscript();
+            } else if(isSignalDetected) {
+                let possibleComannd = filteredArrayTranscript.join(' ').toString();
+                console.log("-->" + arrayTranscript.join(' ').toString())
+                console.log("---->" + possibleComannd)
+                setSelectedCommand(getCommandToVoiceCommand(possibleComannd))
+            }
         }
 
         setInfoTest(filteredArrayTranscript)
@@ -270,16 +283,10 @@ export function WebController() {
         </Row>
         <Row>
             <CommandBar selectedCommand={selectedCommand}/>
-            Selected command {selectedCommand}
-            <div> MikroEingabe: {infoTest}</div>
-
         </Row>
         <Row>
-            <button
-                onClick={() => play()}
-            />
             <Col xs={6}>
-                <div style={{paddingLeft: "20%", paddingRight: "20%"}}>
+                <div style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
                     <ButtonGroup className="mb-3">
                         <Button variant="secondary"
                                 style={micOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
@@ -295,19 +302,11 @@ export function WebController() {
                         </Button>
                     </ButtonGroup>
                     <div>
-                        Webcam
-                    </div>
-                    <div>
-                        <div>
-                            <h2>Speech-Controller {listening ? <BsFillMicFill/> : <BsFillMicMuteFill/>}</h2>
-                            Transcript: {transcript}
-                        </div>
                         <div>
                             <div style={{
                                 position: "relative",
                                 width: screenWidth,
                                 height: screenHeight,
-                                margin: "auto"
                             }}>
                                 <canvas ref={canvas} width={screenWidth} height={screenHeight}
                                         style={{
@@ -338,27 +337,21 @@ export function WebController() {
                                             zIndex: "2",
                                         }}/>
                             </div>
-
                             <video ref={video} width={screenWidth} height={screenHeight}
                                    style={{visibility: "hidden"}}/>
                         </div>
                         <div>
                             <ListGroup componentClass="ul" style={{padding: "3%"}}>
                                 <ListGroupItem>
-                                    Detection: {currentPrediction}
-                                </ListGroupItem>
-                                <ListGroupItem>
-                                    Time passed: {showTime} ms
+                                    Ausgeführter Befehl: {selectedCommand}
                                 </ListGroupItem>
                             </ListGroup>
                         </div>
                     </div>
-                    <div>
-                        Information
-                    </div>
                 </div>
             </Col>
-            <Col><DicomViewer selectedCommand={selectedCommand}/></Col>
+            <Col style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}><DicomViewer
+                selectedCommand={selectedCommand}/></Col>
         </Row>
     </Container>);
 }
