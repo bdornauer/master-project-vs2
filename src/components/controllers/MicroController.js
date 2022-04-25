@@ -32,6 +32,21 @@ export function countWordsAfterSignalWord(arrayTranscript) {
 
 }
 
+export function extractFirstNumberInStringArray(arrayTranscript) {
+    let mySteps = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+    console.log(".." + arrayTranscript);
+    let arrayWithOnlyNumbers = arrayTranscript.filter(function (element) {
+        return mySteps.includes(element)
+    });
+
+    console.log("...." + arrayWithOnlyNumbers);
+    if (arrayWithOnlyNumbers.length > 0)
+        return arrayWithOnlyNumbers[0];
+    else
+        return 1
+}
+
+
 export function getCommandToVoiceCommand(command) {
 
     switch (command) {

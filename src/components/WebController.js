@@ -25,8 +25,11 @@ import {
 import {keySelectionCommand, supressKey} from "./controllers/KeyController";
 import {
     containsSignalWord,
-    filterCommands, getCommandToVoiceCommand,
-    transcriptToArray, transcriptToLowerCase
+    extractFirstNumberInStringArray,
+    filterCommands,
+    getCommandToVoiceCommand,
+    transcriptToArray,
+    transcriptToLowerCase
 } from "./controllers/MicroController";
 import useSound from "use-sound";
 
@@ -36,14 +39,15 @@ export function WebController() {
     const [micOn, setMicOn] = useState(false);
     const [webcamOn, setWebcamOn] = useState(false);
     const [infoTest, setInfoTest] = useState("missing");
+    const [steps, setSteps] = useState(5)
 
     //General
     const [selectedCommand, setSelectedCommand] = useState("")
 
     //Webcam
     const [currentPrediction, setCurrentPredictionString] = useState("")
-    const [screenWidth] = useState(640)
-    const [screenHeight] = useState(480)
+    const [screenWidth] = useState(window.innerWidth * 0.42) //640
+    const [screenHeight] = useState(screenWidth * 0.75) //480
     const [iconSize] = useState(70)
     const [showTime, setShowTime] = useState(70)
 
@@ -62,10 +66,7 @@ export function WebController() {
      *************************************************************************************************** */
 
     const {
-        transcript,
-        listening,
-        resetTranscript,
-        browserSupportsSpeechRecognition
+        transcript, listening, resetTranscript, browserSupportsSpeechRecognition
     } = useSpeechRecognition();
 
     function startListening() {
@@ -93,10 +94,10 @@ export function WebController() {
         } else {
             if (arrayTranscript.length > 5) {
                 resetTranscript();
-            } else if(isSignalDetected) {
+            } else if (isSignalDetected) {
                 let possibleComannd = filteredArrayTranscript.join(' ').toString();
-                console.log("-->" + arrayTranscript.join(' ').toString())
-                console.log("---->" + possibleComannd)
+                let stepsExtracted = extractFirstNumberInStringArray(arrayTranscript)
+                setSteps(stepsExtracted);
                 setSelectedCommand(getCommandToVoiceCommand(possibleComannd))
             }
         }
@@ -114,27 +115,26 @@ export function WebController() {
     }
 
     useEffect(() => {
-            const start = async () => {
-                setWebcamOn(true)
-                model = await handTrack.load(eyeTrackingSettings);
-                canvas2dContext = canvas.current.getContext('2d');
-                await handTrack.startVideo(video.current);
-                drawGridOverlay(grid, screenWidth, screenHeight);
-                drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight);
+        const start = async () => {
+            setWebcamOn(true)
+            model = await handTrack.load(eyeTrackingSettings);
+            canvas2dContext = canvas.current.getContext('2d');
+            await handTrack.startVideo(video.current);
+            drawGridOverlay(grid, screenWidth, screenHeight);
+            drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight);
 
-            }
-            const stop = async () => {
-                setWebcamOn(false)
-                await handTrack.stopVideo();
-            }
+        }
+        const stop = async () => {
+            setWebcamOn(false)
+            await handTrack.stopVideo();
+        }
 
-            if (webcamOn) {
-                start().then(() => detectHandsInVideo())
-            } else {
-                stop()
-            }
-        }, [webcamOn]
-    )
+        if (webcamOn) {
+            start().then(() => detectHandsInVideo())
+        } else {
+            stop()
+        }
+    }, [webcamOn])
 
     function detectHandsInVideo() {
         model.detect(video.current).then(predictions => {
@@ -286,7 +286,7 @@ export function WebController() {
         </Row>
         <Row>
             <Col xs={6}>
-                <div style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
+                <div style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px", alignContent: "center"}}>
                     <ButtonGroup className="mb-3">
                         <Button variant="secondary"
                                 style={micOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
@@ -302,44 +302,28 @@ export function WebController() {
                         </Button>
                     </ButtonGroup>
                     <div>
-                        <div>
                             <div style={{
-                                position: "relative",
-                                width: screenWidth,
-                                height: screenHeight,
+                                position: "relative", width: screenWidth, height: screenHeight,
                             }}>
                                 <canvas ref={canvas} width={screenWidth} height={screenHeight}
                                         style={{
-                                            position: "absolute",
-                                            top: "0",
-                                            left: "0",
-                                            zIndex: "0",
+                                            position: "absolute", top: "0", left: "0", zIndex: "0",
                                         }}/>
                                 <canvas ref={grid} width={screenWidth} height={screenHeight}
                                         style={{
-                                            position: "absolute",
-                                            left: "0",
-                                            top: "0",
-                                            zIndex: "1",
+                                            position: "absolute", left: "0", top: "0", zIndex: "1",
                                         }}/>
                                 <canvas ref={highlighting} width={screenWidth} height={screenHeight}
                                         style={{
-                                            position: "absolute",
-                                            left: "0",
-                                            top: "0",
-                                            zIndex: "2",
+                                            position: "absolute", left: "0", top: "0", zIndex: "2",
                                         }}/>
                                 <canvas ref={iconsLayer} width={screenWidth} height={screenHeight}
                                         style={{
-                                            position: "absolute",
-                                            left: "0",
-                                            top: "0",
-                                            zIndex: "2",
+                                            position: "absolute", left: "0", top: "0", zIndex: "2",
                                         }}/>
                             </div>
                             <video ref={video} width={screenWidth} height={screenHeight}
                                    style={{visibility: "hidden"}}/>
-                        </div>
                         <div>
                             <ListGroup componentClass="ul" style={{padding: "3%"}}>
                                 <ListGroupItem>
@@ -350,8 +334,9 @@ export function WebController() {
                     </div>
                 </div>
             </Col>
-            <Col style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}><DicomViewer
-                selectedCommand={selectedCommand}/></Col>
+            <Col xs={6}style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
+                <DicomViewer selectedCommand={selectedCommand} steps={steps}/>
+            </Col>
         </Row>
     </Container>);
 }
