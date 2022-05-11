@@ -2,6 +2,7 @@ import {Container, Image, Nav, Navbar} from "react-bootstrap";
 import speechIcon from "../assets/logos/speechIcon.svg"
 import keyboardIcon from "../assets/logos/keyboardIcon.svg"
 import gestureIcon from "../assets/logos/gestureIcon.svg"
+import multimodalIcon from "../assets/logos/multimodalIcon.svg"
 import Colors from "./Colors";
 
 export function Header() {
@@ -24,6 +25,12 @@ export function Header() {
                     <Image
                         alt=""
                         src={gestureIcon}
+                        width="40"
+                        height="30"
+                    />
+                    <Image
+                        alt=""
+                        src={multimodalIcon}
                         width="40"
                         height="30"
                     />

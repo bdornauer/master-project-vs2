@@ -2,7 +2,8 @@ import zoomOut from "../icons/ZoomOut.svg";
 import arrowUp from "../icons/arrowUp.svg";
 import zoomIn from "../icons/ZoomIn.svg";
 import arrowLeft from "../icons/arrowLeft.svg";
-import menu2 from "../icons/menu1.svg";
+import menu1 from "../icons/menu1.svg";
+import menu2 from "../icons/menu2.svg";
 import arrowRight from "../icons/arrowRight.svg";
 import contrastMinus from "../icons/brightnessMinus.svg";
 import arrowDown from "../icons/arrowDown.svg";
@@ -11,8 +12,9 @@ import saturationMinus from "../icons/saturationMinus.svg";
 import saturationPlus from "../icons/saturationPlus.svg";
 import invert from "../icons/invert.svg";
 import cancel from "../icons/cancel.svg";
+import turnLeft from "../icons/turnLeft.svg"
+import turnRight from "../icons/turnRight.svg"
 import Colors from "../Colors";
-import colors from "../Colors";
 
 function drawIcon(ctx, icon, x, y, width, height) {
     let img = new Image();
@@ -82,7 +84,7 @@ export function higlichtSection(highlighting, x, y, sectionWidth, sectionHeight,
     ctx.beginPath();
     ctx.rect(x, y, sectionWidth, sectionHeight);
     ctx.lineWidth = 0
-    ctx.fillStyle = colors.brightBlueSemiTransprerent;
+    ctx.fillStyle = Colors.brightBlueSemiTransprerent;
     ctx.fill();
     ctx.stroke();
 }
@@ -186,9 +188,9 @@ export function drawIconsMenu2(iconsLayer, iconSize, screenWidth, screenHeight) 
     //drawIcon(ctx, cancel, 3 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
     drawIcon(ctx, saturationPlus, 5 * sectionHorizontal - halfSizeIcon, sectionVertical, iconSize, iconSize);
     drawIcon(ctx, invert, sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-    drawIcon(ctx, menu2, 3 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
+    drawIcon(ctx, menu1, 3 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
     drawIcon(ctx, cancel, 5 * sectionHorizontal - halfSizeIcon, 3 * sectionVertical, iconSize, iconSize);
-    //drawIcon(ctx, contrastMinus, sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-    //drawIcon(ctx, arrowDown, 3 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
-    //drawIcon(ctx, contrastPlus, 5 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
+    drawIcon(ctx, turnLeft, sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
+    //drawIcon(ctx, turnRight, 3 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
+    drawIcon(ctx, turnRight, 5 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
 }

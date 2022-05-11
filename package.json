@@ -16,6 +16,7 @@
     "dicom-parser": "^1.8.13",
     "hammerjs": "^2.0.8",
     "handtrackjs": "^0.1.5",
+    "jspdf": "^2.5.1",
     "react": "^18.0.0",
     "react-bootstrap": "^2.2.3",
     "react-dom": "^18.0.0",
@@ -23,6 +24,7 @@
     "react-loading": "^2.0.3",
     "react-scripts": "5.0.1",
     "react-speech-recognition": "^3.9.0",
+    "react-to-print": "^2.14.7",
     "serve": "^13.0.2",
     "use-sound": "^4.0.1",
     "web-vitals": "^2.1.4"
@@ -52,5 +54,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "dependency-cruiser": "^11.7.0"
   }
 }

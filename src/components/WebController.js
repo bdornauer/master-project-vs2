@@ -1,4 +1,4 @@
-import {Button, ButtonGroup, Col, Container, ListGroup, ListGroupItem, Row} from "react-bootstrap";
+import {Button, ButtonGroup, Col, Container, ListGroup, ListGroupItem, Modal, Row} from "react-bootstrap";
 import DicomViewer from "./dicomViewer/DicomViewer";
 import {useEffect, useRef, useState} from "react";
 import CommandBar from "./commandBar/CommandBar";
@@ -7,7 +7,7 @@ import * as handTrack from 'handtrackjs';
 import {BsCameraVideo, BsCameraVideoOff, BsFillMicFill, BsFillMicMuteFill, BsMic, BsMicMute} from "react-icons/bs";
 import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
 import confirmSound from "../assets/confirm.wav"
-
+import JsPDF from 'jspdf';
 //Webcam
 import {
     filterPinchAndClosedHandGesture,
@@ -20,9 +20,9 @@ import {
     drawGridOverlay,
     removeCanvasLayer,
     highlightSectionActive
-} from "./controllers/WebcamController";
+} from "./controllers/HandtrackController";
 
-import {keySelectionCommand, supressKey} from "./controllers/KeyController";
+import {keySelectionCommand, supressKey} from "./controllers/KeyboardController";
 import {
     containsSignalWord,
     extractFirstNumberInStringArray,
@@ -30,10 +30,11 @@ import {
     getCommandToVoiceCommand,
     transcriptToArray,
     transcriptToLowerCase
-} from "./controllers/MicroController";
+} from "./controllers/SpeechController";
 import useSound from "use-sound";
+import {HelpPage} from "./HelpPage";
 
-export function WebController() {
+export function WebController(props) {
     const [play] = useSound(confirmSound);
 
     const [micOn, setMicOn] = useState(false);
@@ -54,6 +55,12 @@ export function WebController() {
     //Micro
     const [isSignalDetected, setIsSignalDetected] = useState(false)
 
+    //modal
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
 
     const video = useRef(null);
     const canvas = useRef(null)
@@ -64,6 +71,20 @@ export function WebController() {
     /****************************************************************************************************
      * MICRO Controller
      *************************************************************************************************** */
+
+    useEffect ( () => {
+        if (props.modus === "speech") {
+            setMicOn(true)
+            startListening();
+        } else if (props.modus === "gesture") {
+            setWebcamOn(true)
+            console.log(webcamOn)
+        } else if (props.modus === "multimodal") {
+            setMicOn(true)
+            startListening();
+            setWebcamOn(true)
+        }
+    }, [props.modus])
 
     const {
         transcript, listening, resetTranscript, browserSupportsSpeechRecognition
@@ -172,7 +193,7 @@ export function WebController() {
             if (activeMenuNr === 1) {
                 switch (gridSection) {
                     case "topLeft":
-                        console.log("topLeft");
+                        selection = "zoomOut"
                         break;
                     case "topCenter":
                         selection = "goUp"
@@ -190,7 +211,6 @@ export function WebController() {
                         break;
                     case "centerRight":
                         selection = "goRight"
-                        selection = "cancel"
                         break;
                     case "bottomLeft":
                         selection = "brightnessDown"
@@ -210,7 +230,6 @@ export function WebController() {
                         selection = "saturationDown"
                         break;
                     case "topCenter":
-
                         break;
                     case "topRight":
                         selection = "saturationUp"
@@ -224,13 +243,15 @@ export function WebController() {
                         activeMenuNr = 1
                         break;
                     case "centerRight":
-                        selection = "cancel"
+                        selection = "default"
                         break;
                     case "bottomLeft":
+                        selection = "turnLeft"
                         break;
                     case "bottomCenter":
                         break;
                     case "bottomRight":
+                        selection = "turnRight"
                         break;
                     default:
                         break;
@@ -273,7 +294,6 @@ export function WebController() {
         document.addEventListener("keydown", pressedKeyAction);
     })
 
-
     /****************************************************************************************************
      * VIEW
      *************************************************************************************************** */
@@ -288,6 +308,7 @@ export function WebController() {
             <Col xs={6}>
                 <div style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px", alignContent: "center"}}>
                     <ButtonGroup className="mb-3">
+
                         <Button variant="secondary"
                                 style={micOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
                                 onClick={() => micOn ? stopListening() : startListening()}>
@@ -300,30 +321,33 @@ export function WebController() {
                             {webcamOn ? <BsCameraVideo/> : <BsCameraVideoOff/>}
                             Webcam
                         </Button>
+                        <Button variant="secondary" onClick={handleShow}>
+                            Information
+                        </Button>
                     </ButtonGroup>
                     <div>
-                            <div style={{
-                                position: "relative", width: screenWidth, height: screenHeight,
-                            }}>
-                                <canvas ref={canvas} width={screenWidth} height={screenHeight}
-                                        style={{
-                                            position: "absolute", top: "0", left: "0", zIndex: "0",
-                                        }}/>
-                                <canvas ref={grid} width={screenWidth} height={screenHeight}
-                                        style={{
-                                            position: "absolute", left: "0", top: "0", zIndex: "1",
-                                        }}/>
-                                <canvas ref={highlighting} width={screenWidth} height={screenHeight}
-                                        style={{
-                                            position: "absolute", left: "0", top: "0", zIndex: "2",
-                                        }}/>
-                                <canvas ref={iconsLayer} width={screenWidth} height={screenHeight}
-                                        style={{
-                                            position: "absolute", left: "0", top: "0", zIndex: "2",
-                                        }}/>
-                            </div>
-                            <video ref={video} width={screenWidth} height={screenHeight}
-                                   style={{visibility: "hidden"}}/>
+                        <div style={{
+                            position: "relative", width: screenWidth, height: screenHeight,
+                        }}>
+                            <canvas ref={canvas} width={screenWidth} height={screenHeight}
+                                    style={{
+                                        position: "absolute", top: "0", left: "0", zIndex: "0",
+                                    }}/>
+                            <canvas ref={grid} width={screenWidth} height={screenHeight}
+                                    style={{
+                                        position: "absolute", left: "0", top: "0", zIndex: "1",
+                                    }}/>
+                            <canvas ref={highlighting} width={screenWidth} height={screenHeight}
+                                    style={{
+                                        position: "absolute", left: "0", top: "0", zIndex: "2",
+                                    }}/>
+                            <canvas ref={iconsLayer} width={screenWidth} height={screenHeight}
+                                    style={{
+                                        position: "absolute", left: "0", top: "0", zIndex: "2",
+                                    }}/>
+                        </div>
+                        <video ref={video} width={screenWidth} height={screenHeight}
+                               style={{visibility: "hidden"}}/>
                         <div>
                             <ListGroup componentClass="ul" style={{padding: "3%"}}>
                                 <ListGroupItem>
@@ -334,9 +358,25 @@ export function WebController() {
                     </div>
                 </div>
             </Col>
-            <Col xs={6}style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
+            <Col xs={6} style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
                 <DicomViewer selectedCommand={selectedCommand} steps={steps}/>
             </Col>
+            <>
+                <Modal show={show} onHide={handleClose} size={"xl"} aria-labelledby="contained-modal-title-vcenter"
+                       media="print" centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Beschreibung der Funktionalitäten</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <HelpPage/>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                            Close
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            </>
         </Row>
     </Container>);
 }

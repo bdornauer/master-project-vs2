@@ -17,13 +17,13 @@ export function keySelectionCommand(pressedKey) {
             return ("goDown");
         case 'ArrowRight':
             return ("goRight");
-        case 'w':
-            return ("layerUp");
-        case 's':
-            return ("layerDown");
         case 'a':
-            return ("brightnessDown");
+            return ("turnLeft");
         case 'd':
+            return ("turnRight");
+        case 'w':
+            return ("brightnessDown");
+        case 's':
             return ("brightnessUp");
         case 'n':
             return ("saturationDown");
