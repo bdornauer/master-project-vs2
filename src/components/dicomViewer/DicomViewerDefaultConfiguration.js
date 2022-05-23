@@ -31,9 +31,20 @@ const config = {
     }
 };
 
-let exampleJPG = 'https://rawgit.com/cornerstonejs/cornerstoneWebImageLoader/master/examples/Renal_Cell_Carcinoma.jpg';
-let exampleDCM = 'wadouri:http://localhost:3000/test.DCM'
-let exampleDCM2 = 'wadouri:https://raw.githubusercontent.com/cornerstonejs/cornerstoneWADOImageLoader/master/testImages/CT2_J2KR'
-let exampleLocal = "wadouri:http://localhost:3000/localExample.DCM"
+const DICOM_brain = 'wadouri:http://localhost:3000/sampleFiles/DICOM_brain.DCM';
+const DICOM_spine = 'wadouri:http://localhost:3000/sampleFiles/DICOM_spine.DCM';
+const DICOM_spine_section = 'wadouri:http://localhost:3000/sampleFiles/DICOM_spine_section.DCM';
+const JPG_Renal_Cell_Carcinoma = 'http://localhost:3000/sampleFiles/JPG_Renal_Cell_Carcinoma.jpeg';
+const PNG_brain = 'http://localhost:3000/sampleFiles/PNG_brain.png';
 
-export default {config, defaultViewport, dicomSettings, exampleJPG, exampleDCM, exampleDCM2,exampleLocal}
+
+export default {
+    config,
+    defaultViewport,
+    dicomSettings,
+    DICOM_brain,
+    DICOM_spine,
+    DICOM_spine_section,
+    JPG_Renal_Cell_Carcinoma,
+    PNG_brain
+}

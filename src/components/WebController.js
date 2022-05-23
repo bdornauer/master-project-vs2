@@ -39,8 +39,9 @@ export function WebController(props) {
 
     const [micOn, setMicOn] = useState(false);
     const [webcamOn, setWebcamOn] = useState(false);
-    const [infoTest, setInfoTest] = useState("missing");
     const [steps, setSteps] = useState(5)
+
+    const [initWebcamOn, setInitWebcamOn] = useState(true);
 
     //General
     const [selectedCommand, setSelectedCommand] = useState("")
@@ -54,6 +55,7 @@ export function WebController(props) {
 
     //Micro
     const [isSignalDetected, setIsSignalDetected] = useState(false)
+    const [ouputMicro, setoOutputMicro] = useState("")
 
     //modal
     const [show, setShow] = useState(false);
@@ -72,17 +74,13 @@ export function WebController(props) {
      * MICRO Controller
      *************************************************************************************************** */
 
-    useEffect ( () => {
+    useEffect(() => {
         if (props.modus === "speech") {
-            setMicOn(true)
             startListening();
         } else if (props.modus === "gesture") {
-            setWebcamOn(true)
-            console.log(webcamOn)
+
         } else if (props.modus === "multimodal") {
-            setMicOn(true)
             startListening();
-            setWebcamOn(true)
         }
     }, [props.modus])
 
@@ -122,8 +120,6 @@ export function WebController(props) {
                 setSelectedCommand(getCommandToVoiceCommand(possibleComannd))
             }
         }
-
-        setInfoTest(filteredArrayTranscript)
     }, [transcript]);
 
     /****************************************************************************************************
@@ -133,6 +129,10 @@ export function WebController(props) {
         flipHorizontal: true,   // flip e.g for video
         imageScaleFactor: 1,  // reduce input image size .
         maxNumBoxes: 5,        // maximum number of boxes to detect
+    }
+
+    function startWebcam() {
+        setWebcamOn(true);
     }
 
     useEffect(() => {
@@ -150,12 +150,20 @@ export function WebController(props) {
             await handTrack.stopVideo();
         }
 
-        if (webcamOn) {
+        const begin = async () => {
+            setWebcamOn(true)
+        }
+        begin();
+
+
+        //TODO:  logic
+        if (webcamOn || initWebcamOn && (props.modus === "gesture" || props.modus === "multimodal")) {
+            setInitWebcamOn(false);
             start().then(() => detectHandsInVideo())
         } else {
             stop()
         }
-    }, [webcamOn])
+    }, [ webcamOn])
 
     function detectHandsInVideo() {
         model.detect(video.current).then(predictions => {
@@ -258,7 +266,7 @@ export function WebController(props) {
                 }
             }
         }
-
+        setSteps(1);
         setSelectedCommand(selection)
 
         setTimeout(() => {
@@ -308,7 +316,6 @@ export function WebController(props) {
             <Col xs={6}>
                 <div style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px", alignContent: "center"}}>
                     <ButtonGroup className="mb-3">
-
                         <Button variant="secondary"
                                 style={micOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
                                 onClick={() => micOn ? stopListening() : startListening()}>
@@ -325,6 +332,14 @@ export function WebController(props) {
                             Information
                         </Button>
                     </ButtonGroup>
+                    <div>
+                        <ListGroup componentClass="ul" style={{padding: "3%"}}>
+                            <ListGroupItem>
+                                Eingabe: {transcript}
+                            </ListGroupItem>
+                        </ListGroup>
+                    </div>
+
                     <div>
                         <div style={{
                             position: "relative", width: screenWidth, height: screenHeight,
@@ -348,13 +363,6 @@ export function WebController(props) {
                         </div>
                         <video ref={video} width={screenWidth} height={screenHeight}
                                style={{visibility: "hidden"}}/>
-                        <div>
-                            <ListGroup componentClass="ul" style={{padding: "3%"}}>
-                                <ListGroupItem>
-                                    Ausgeführter Befehl: {selectedCommand}
-                                </ListGroupItem>
-                            </ListGroup>
-                        </div>
                     </div>
                 </div>
             </Col>

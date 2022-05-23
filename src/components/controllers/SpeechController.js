@@ -1,4 +1,4 @@
-const grammar = ["mike", "top", "down", "left", "right", "zoom", "in", "out", "brightness","increase", "decrease", "invert", "turn", "clockwise", "counter-clockwise"];
+const grammar = ["mike", "top", "down", "left", "right", "zoom", "in", "out", "brightness","increase", "decrease", "invert", "turn", "clockwise", "counter-clockwise", "default"];
 
 export function transcriptToLowerCase(transcript) {
     return transcript.toLowerCase();
@@ -48,7 +48,6 @@ export function extractFirstNumberInStringArray(arrayTranscript) {
 
 
 export function getCommandToVoiceCommand(command) {
-
     switch (command) {
         case 'zoom in':
             return ("zoomIn");
@@ -74,10 +73,10 @@ export function getCommandToVoiceCommand(command) {
             return ("turnRight");
         case 'turn counter-clockwise':
             return ("turnLeft");
-        case 'invert':
-            return ("invert");
         case 'default':
             return ("default");
+        case 'invert':
+            return ("invert");
         default:
             return ("");
     }

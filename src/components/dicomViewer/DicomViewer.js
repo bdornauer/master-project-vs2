@@ -8,7 +8,7 @@ import Hammer from "hammerjs";
 import dicomParser from "dicom-parser"
 
 import {Fragment, useEffect, useState} from "react";
-import {Form, ListGroup, ListGroupItem} from "react-bootstrap";
+import {Col, Form, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 import configurations from "./DicomViewerDefaultConfiguration"
 import Colors from "../Colors"
 
@@ -34,11 +34,15 @@ function DicomViewer(props) {
     let dicomElement, canvas;
     const [isCornerstoneLoaded, setIsCornerstoneLoaded] = useState(false)
     const [brigthnessLevel, setBrigthnessLevel] = useState(1)
+    const [brigthnessDefaulLevel, setBrigthnessDefaultLevel] = useState(1)
     const [saturationLevel, setSaturationLevel] = useState(1)
+    const [zoomLevel, setZoomLevel] = useState(1)
     const [degreeTurn, setDegreeTurn] = useState(0);
     const [isInverted, setIsInverted] = useState(true)
     const [dicomWidth, setDicomWidth] = useState(window.innerWidth * 0.42)
     const [dicomHeight, setDicomHeight] = useState(dicomWidth * 0.75)
+
+    const [defaultImage, setDefaultImage] = useState(configurations.DICOM_brain)
 
     configurations.dicomSettings.width = dicomWidth
     configurations.dicomSettings.height = dicomHeight
@@ -54,7 +58,7 @@ function DicomViewer(props) {
 
             //load sample-image & update viewport
             async function startProcess() {
-                let image = await cornerstone.loadImage(configurations.exampleDCM2);
+                let image = await cornerstone.loadImage(configurations.DICOM_spine_section);
                 await cornerstone.displayImage(dicomElement, image);
                 initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
             }
@@ -159,25 +163,25 @@ function DicomViewer(props) {
     function changeSaturation() {
         let context = canvas.getContext('2d')
         context.filter = "saturate(" + saturationLevel + ")";
-        changeBrigthness();
     }
 
     /**
      * Change brightness of canvas
      */
     function brightnessUp(steps) {
-        setBrigthnessLevel(brigthnessLevel + 0.1 * steps)
+        setBrigthnessLevel(brigthnessLevel - 10 * steps)
         changeBrigthness();
     }
 
     function brigthnessDown(steps) {
-        setBrigthnessLevel(brigthnessLevel - 0.1 * steps)
+        setBrigthnessLevel(brigthnessLevel + 10 * steps)
         changeBrigthness();
     }
 
     function changeBrigthness() {
-        let context = canvas.getContext('2d')
-        context.filter = "brightness(" + brigthnessLevel + ")";
+        let currentViewport = cornerstone.getViewport(dicomElement);
+        currentViewport.voi.windowCenter = brigthnessLevel;
+        cornerstone.setViewport(dicomElement, currentViewport);
     }
 
     /**
@@ -200,6 +204,7 @@ function DicomViewer(props) {
     function zoom(currentViewport) {
         cornerstone.setViewport(dicomElement, currentViewport);
         cornerstone.updateImage(dicomElement);
+        setZoomLevel(currentViewport.scale)
     }
 
     /**
@@ -234,10 +239,10 @@ function DicomViewer(props) {
             case "goRight":
                 currentViewport.translation.x += delta;
                 break;
-            case "goDown":
+            case "goUp":
                 currentViewport.translation.y -= delta;
                 break;
-            case "goUp":
+            case "goDown":
                 currentViewport.translation.y += delta;
                 break;
             default:
@@ -278,11 +283,18 @@ function DicomViewer(props) {
      * Setting everything to default.
      */
     function setDefaultValues() {
-        setSaturationLevel(1);
+
         setIsInverted(false);
-        setBrigthnessLevel(1);
+
+        setDegreeTurn(0)
+        turn(0)
+
+        setBrigthnessLevel(brigthnessDefaulLevel);
         changeBrigthness(0);
+
+        setSaturationLevel(1);
         changeSaturation(0);
+
         if (!isInverted) {
             invertColors()
         }
@@ -291,7 +303,7 @@ function DicomViewer(props) {
 
         currentViewport.translation.x = 0
         currentViewport.translation.y = 0
-        currentViewport.scale = 1.2
+        currentViewport.scale = 1.0
 
         cornerstone.setViewport(dicomElement, currentViewport);
         cornerstone.updateImage(dicomElement);
@@ -304,6 +316,8 @@ function DicomViewer(props) {
     function initializeViewport(viewport) {
         cornerstone.setViewport(dicomElement, viewport);
         cornerstone.updateImage(dicomElement);
+        setBrigthnessDefaultLevel(viewport.voi.windowCenter);
+        setBrigthnessLevel(viewport.voi.windowCenter)
     }
 
     function invertColors() {
@@ -336,16 +350,50 @@ function DicomViewer(props) {
 
     }
 
+    /**
+     * Loading one of the defaut images
+     */
+    useEffect( () => {
+        dicomElement = document.getElementById('dicomImage'); //the view of the the file
+
+        async function loadDefaultImage() {
+            let image = await cornerstone.loadImage(defaultImage);
+            await cornerstone.displayImage(dicomElement, image);
+            initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
+        }
+
+        loadDefaultImage();
+
+    }, [defaultImage])
+
+    function test(e) {
+        console.log(e);
+    }
 
     return (
         <Fragment>
             <h3>Dicom Viewer</h3>
-            <div style={{marginRight: "50px"}}>
+            <div >
                 <Form style={{textAlign: "left"}}>
                     <Form.Label>Lade eine JPG, PNG oder ein DICOM-File hoch</Form.Label>
-                    <Form.Group controlId="formFileSm">
-                        <Form.Control type="file" onChange={setNewImage} size="sm"/>
-                    </Form.Group>
+                    <Row>
+                        <Col sm={8}>
+                            <Form.Control type="file" onChange={setNewImage} />
+                        </Col>
+                        <Col sm={4}>
+                            <Form.Select
+                                onChange={(e) => {
+                                    setDefaultImage(e.target.value)
+                                }}
+                            >
+                                <option value={configurations.DICOM_brain}>Gehirn</option>
+                                <option value={configurations.PNG_brain}>Gehirn 2</option>
+                                <option value={configurations.DICOM_spine}>Wirbelsäule</option>
+                                <option value={configurations.DICOM_spine_section}>Wirbelsäule Querschnitt</option>
+                                <option value={configurations.JPG_Renal_Cell_Carcinoma}>Zell-Karzinom</option>
+                            </Form.Select>
+                        </Col>
+                    </Row>
                 </Form>
                 <div id="dicomImage"
                      style={{
@@ -356,8 +404,10 @@ function DicomViewer(props) {
                      }}/>
                 <div style={{textAlign: "left"}}>
                     <ListGroup>
-                        <ListGroupItem>Saturation: {Math.round(saturationLevel * 100)}% </ListGroupItem>
-                        <ListGroupItem>Brightness: {Math.round(brigthnessLevel * 100)}%</ListGroupItem>
+                        <ListGroupItem>Brightness: {Math.round(brigthnessLevel)} Level
+                            (default: {Math.round(brigthnessDefaulLevel)}) </ListGroupItem>
+                        <ListGroupItem>Zoom: {Math.round(zoomLevel * 100)}</ListGroupItem>
+                        <ListGroupItem>Degree: {Math.round(degreeTurn * 100)}&deg;</ListGroupItem>
                         <ListGroupItem>Invert on: {isInverted === false ? "off" : "on"}</ListGroupItem>
                     </ListGroup>
                 </div>
