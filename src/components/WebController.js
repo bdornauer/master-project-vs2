@@ -155,8 +155,6 @@ export function WebController(props) {
         }
         begin();
 
-
-        //TODO:  logic
         if (webcamOn || initWebcamOn && (props.modus === "gesture" || props.modus === "multimodal")) {
             setInitWebcamOn(false);
             start().then(() => detectHandsInVideo())
