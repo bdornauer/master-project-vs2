@@ -6,7 +6,7 @@ import keyboardIcon from "../assets/logos/keyboardIcon.svg"
 import gestureIcon from "../assets/logos/gestureIcon.svg"
 import multiModalIcon from "../assets/logos/multimodalIcon.svg"
 
-import {Card, CardGroup, Col, Row} from "react-bootstrap";
+import {Card, CardGroup} from "react-bootstrap";
 import Colors from "./Colors";
 import {WebController} from "./WebController";
 

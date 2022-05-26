@@ -1,12 +1,9 @@
 import React from 'react';
-import {Row, Table} from "react-bootstrap";
+import {Table} from "react-bootstrap";
 import colors from "../Colors";
 import zoomOut from "../../assets/icons/ZoomOut.svg"
 import arrowUp from "../../assets/icons/arrowUp.svg";
-import zoomIn from "../../assets/icons/ZoomIn.svg";
 import arrowLeft from "../../assets/icons/arrowLeft.svg";
-import menu1 from "../../assets/icons/menu1.svg";
-import menu2 from "../../assets/icons/menu2.svg";
 import arrowRight from "../../assets/icons/arrowRight.svg";
 import contrastMinus from "../../assets/icons/brightnessMinus.svg";
 import arrowDown from "../../assets/icons/arrowDown.svg";

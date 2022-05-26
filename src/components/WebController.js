@@ -78,8 +78,6 @@ export function WebController(props) {
     useEffect(() => {
         if (props.modus === "speech") {
             startListening();
-        } else if (props.modus === "gesture") {
-
         } else if (props.modus === "multimodal") {
             startListening();
         }

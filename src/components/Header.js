@@ -1,4 +1,4 @@
-import {Container, Image, Nav, Navbar} from "react-bootstrap";
+import {Container, Image, Navbar} from "react-bootstrap";
 import speechIcon from "../assets/logos/speechIcon.svg"
 import keyboardIcon from "../assets/logos/keyboardIcon.svg"
 import gestureIcon from "../assets/logos/gestureIcon.svg"
