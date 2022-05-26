@@ -15,7 +15,6 @@ import {
     calculateCenterOfBBox,
     containsPredictions,
     positionInGrid,
-    predictionPositionToString,
     drawIconsMenu1,
     drawIconsMenu2,
     drawGridOverlay,
@@ -76,9 +75,7 @@ export function WebController(props) {
      *************************************************************************************************** */
 
     useEffect(() => {
-        if (props.modus === "speech") {
-            startListening();
-        } else if (props.modus === "multimodal") {
+        if (props.modus === "speech" || props.modus === "multimodal") {
             startListening();
         }
     }, [props.modus])
