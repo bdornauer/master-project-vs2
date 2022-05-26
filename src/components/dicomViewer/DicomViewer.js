@@ -39,8 +39,8 @@ function DicomViewer(props) {
     const [zoomLevel, setZoomLevel] = useState(1)
     const [degreeTurn, setDegreeTurn] = useState(0);
     const [isInverted, setIsInverted] = useState(true)
-    const [dicomWidth, setDicomWidth] = useState(window.innerWidth * 0.42)
-    const [dicomHeight, setDicomHeight] = useState(dicomWidth * 0.75)
+    const [dicomWidth] = useState(window.innerWidth * 0.42)
+    const [dicomHeight] = useState(dicomWidth * 0.75)
 
     const [defaultImage, setDefaultImage] = useState(configurations.DICOM_brain)
 
@@ -116,6 +116,16 @@ function DicomViewer(props) {
                     break;
             }
         }
+
+        const func = () => {
+            console.log("ok")
+            cornerstone.resize(dicomElement);
+        }
+        window.addEventListener("resize", func)
+        return () => {
+            window.removeEventListener("resize", func)
+        }
+
     }, [props.selectedCommand])
 
     /****************************************************************************************************
@@ -184,11 +194,6 @@ function DicomViewer(props) {
         cornerstone.setViewport(dicomElement, currentViewport);
     }
 
-    /**
-     * Zooming
-     * @param currentViewport set the zoomed viewport
-     */
-
     function zoomIn(steps) {
         let currentViewport = cornerstone.getViewport(dicomElement);
         currentViewport.scale += 0.1 * steps
@@ -206,12 +211,6 @@ function DicomViewer(props) {
         cornerstone.updateImage(dicomElement);
         setZoomLevel(currentViewport.scale)
     }
-
-    /**
-     * Function to move the viewport left, right, top and down
-     * @param currentViewport set the zoomed viewport
-     * @param direction ("goLeft","goRight", "goUp", "goDown")
-     */
 
     function goLeft(steps) {
         navigation("goLeft", steps)
@@ -232,6 +231,7 @@ function DicomViewer(props) {
     function navigation(direction, steps) {
         let currentViewport = cornerstone.getViewport(dicomElement);
         let delta = 10 * steps;
+        console.log("Delta: " + delta);
         switch (direction) {
             case "goLeft":
                 currentViewport.translation.x -= delta;
@@ -269,11 +269,11 @@ function DicomViewer(props) {
     }
 
     function turnLeft() {
-        turn(degreeTurn - 10)
+        turn(degreeTurn - 36*props.steps)
     }
 
     function turnRight() {
-        turn(degreeTurn + 10)
+        turn(degreeTurn + 36*props.steps)
     }
 
     /****************************************************************************************************
@@ -365,10 +365,6 @@ function DicomViewer(props) {
         loadDefaultImage();
 
     }, [defaultImage])
-
-    function test(e) {
-        console.log(e);
-    }
 
     return (
         <Fragment>

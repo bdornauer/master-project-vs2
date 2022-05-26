@@ -4,7 +4,7 @@ import {useEffect, useRef, useState} from "react";
 import CommandBar from "./commandBar/CommandBar";
 import {Header} from "./Header";
 import * as handTrack from 'handtrackjs';
-import {BsCameraVideo, BsCameraVideoOff, BsFillMicFill, BsFillMicMuteFill, BsMic, BsMicMute} from "react-icons/bs";
+import {BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute} from "react-icons/bs";
 import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
 import confirmSound from "../assets/confirmSound.wav"
 
@@ -35,14 +35,12 @@ import {
 import useSound from "use-sound";
 import {InformationController} from "./informationController/InformationController";
 
-import Styles from "./WebController.css"
-
 export function WebController(props) {
     const [play] = useSound(confirmSound);
 
     const [micOn, setMicOn] = useState(false);
     const [webcamOn, setWebcamOn] = useState(false);
-    const [steps, setSteps] = useState(5)
+    const [steps, setSteps] = useState(1)
 
     const [initWebcamOn, setInitWebcamOn] = useState(true);
 
@@ -50,15 +48,12 @@ export function WebController(props) {
     const [selectedCommand, setSelectedCommand] = useState("")
 
     //Webcam
-    const [currentPrediction, setCurrentPredictionString] = useState("")
     const [screenWidth] = useState(window.innerWidth * 0.42) //640
     const [screenHeight] = useState(screenWidth * 0.75) //480
     const [iconSize] = useState(screenWidth*0.12)
-    const [showTime, setShowTime] = useState(70)
 
     //Micro
     const [isSignalDetected, setIsSignalDetected] = useState(false)
-    const [ouputMicro, setoOutputMicro] = useState("")
 
     //modal
     const [show, setShow] = useState(false);
@@ -73,6 +68,9 @@ export function WebController(props) {
     const iconsLayer = useRef(null)
     const highlighting = useRef(null)
     let canvas2dContext, model, activeMenuNr = 1, startTime = 0, timePassed = 0;
+
+
+
     /****************************************************************************************************
      * MICRO Controller
      *************************************************************************************************** */
@@ -88,7 +86,7 @@ export function WebController(props) {
     }, [props.modus])
 
     const {
-        transcript, listening, resetTranscript, browserSupportsSpeechRecognition
+        transcript, resetTranscript
     } = useSpeechRecognition();
 
     function startListening() {
@@ -107,8 +105,10 @@ export function WebController(props) {
         let stringTranscript = transcriptToLowerCase(transcript);
         let arrayTranscript = transcriptToArray(stringTranscript);
         let filteredArrayTranscript = filterCommands(arrayTranscript);
+        console.log("------")
+        console.log("Without: " + arrayTranscript)
+        console.log("With filter: " + filteredArrayTranscript)
 
-        console.log(arrayTranscript)
         if (containsSignalWord(filteredArrayTranscript)) {
             play()
             setIsSignalDetected(true)
@@ -116,13 +116,29 @@ export function WebController(props) {
         } else {
             if (arrayTranscript.length > 5) {
                 resetTranscript();
+                setSteps(1);
             } else if (isSignalDetected) {
-                let possibleComannd = filteredArrayTranscript.join(' ').toString();
+                let possibleCommand = filteredArrayTranscript.join(' ').toString();
                 let stepsExtracted = extractFirstNumberInStringArray(arrayTranscript)
-                setSteps(stepsExtracted);
-                setSelectedCommand(getCommandToVoiceCommand(possibleComannd))
+
+
+                const specificCommaned = getCommandToVoiceCommand(possibleCommand);
+                if(specificCommaned !== "") {
+                    setSteps(parseInt(stepsExtracted));
+                    console.log("Value steps:" + parseInt(steps))
+                    console.log("Type steps:" + typeof steps)
+
+                    setSelectedCommand(specificCommaned);
+
+                    setTimeout(() => {
+                        setSelectedCommand("");
+                    }, 200);
+
+                    resetTranscript();
+                }
             }
         }
+
     }, [transcript]);
 
     /****************************************************************************************************
@@ -134,19 +150,16 @@ export function WebController(props) {
         maxNumBoxes: 5,        // maximum number of boxes to detect
     }
 
-    function startWebcam() {
-        setWebcamOn(true);
-    }
-
     useEffect(() => {
         const start = async () => {
             setWebcamOn(true)
             model = await handTrack.load(eyeTrackingSettings);
             canvas2dContext = canvas.current.getContext('2d');
+            console.log(screenWidth)
+            removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
             await handTrack.startVideo(video.current);
             drawGridOverlay(grid, screenWidth, screenHeight);
             drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight);
-
         }
         const stop = async () => {
             setWebcamOn(false)
@@ -164,6 +177,8 @@ export function WebController(props) {
         } else {
             stop()
         }
+
+
     }, [webcamOn])
 
     function detectHandsInVideo() {
@@ -175,17 +190,13 @@ export function WebController(props) {
                 const centerOfBBox = calculateCenterOfBBox(bBox[0], bBox[1], bBox[2], bBox[3]) //position of pinch or closed Hand
                 const gridPosition = positionInGrid(centerOfBBox[0], centerOfBBox[1], screenWidth, screenHeight) //decided in 3x3 grid were gesture ist detected
                 timePassed = performance.now() - startTime;
-                setShowTime(timePassed);
+
                 controlCommandPalet(gridPosition);
                 highlightSectionActive(gridPosition, highlighting, screenWidth, screenHeight)
-                const positionString = predictionPositionToString(centerOfBBox[0], centerOfBBox[1])
-                setCurrentPredictionString("Position: " + positionString + " in Grid " + gridPosition);
             } else {
                 startTime = performance.now();
                 timePassed = 0
-                setShowTime(timePassed);
                 removeCanvasLayer(highlighting, screenWidth, screenHeight);
-                setCurrentPredictionString("Nothing detected");
             }
 
             model.renderPredictions(predictions, canvas.current, canvas2dContext, video.current);
@@ -214,9 +225,9 @@ export function WebController(props) {
                         selection = "goLeft"
                         break;
                     case "centerCenter":
-                        removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
-                        drawIconsMenu2(iconsLayer, iconSize, screenWidth, screenHeight)
                         activeMenuNr = 2
+                        removeCanvasLayer(iconsLayer, screenWidth, screenHeight);
+                        drawIconsMenu2(iconsLayer, iconSize, screenWidth, screenHeight)
                         break;
                     case "centerRight":
                         selection = "goRight"
@@ -247,9 +258,9 @@ export function WebController(props) {
                         selection = "invert"
                         break;
                     case "centerCenter":
+                        activeMenuNr = 1
                         removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
                         drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight)
-                        activeMenuNr = 1
                         break;
                     case "centerRight":
                         selection = "default"
@@ -268,11 +279,12 @@ export function WebController(props) {
             }
         }
         setSteps(1);
-        setSelectedCommand(selection)
 
         setTimeout(() => {
             setSelectedCommand("");
         }, 200);
+
+        setSelectedCommand(selection);
 
     }
 
@@ -290,7 +302,7 @@ export function WebController(props) {
 
         setTimeout(() => {
             setSelectedCommand("");
-        }, 20);
+        }, 200);
 
         let commandToKey = keySelectionCommand(pressedKey.key);
         setSelectedCommand(commandToKey);
@@ -353,6 +365,8 @@ export function WebController(props) {
                             }}>
                                 <video ref={video} width={screenWidth} height={screenHeight} style={{
                                     position: "absolute",
+                                    width: screenWidth,
+                                    height: screenHeight,
                                     top: "0",
                                     left: "0"
                                 }}/>

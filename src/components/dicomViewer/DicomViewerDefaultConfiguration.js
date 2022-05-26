@@ -15,8 +15,6 @@ const defaultViewport = {
 };
 
 const dicomSettings = {
-    width: "512px",
-    height: "512px",
     backgroundColors: Colors.darkblue,
 }
 

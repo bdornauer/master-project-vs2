@@ -1,4 +1,5 @@
-const grammar = ["mike", "top", "down", "left", "right", "zoom", "in", "out", "brightness","increase", "decrease", "invert", "turn", "clockwise", "counter-clockwise", "default"];
+const grammar = ["mike", "top", "down", "left", "right", "zoom", "in", "out",
+    "brightness", "increase", "decrease", "invert", "turn", "clockwise", "counter-clockwise", "default"];
 
 export function transcriptToLowerCase(transcript) {
     return transcript.toLowerCase();
@@ -34,20 +35,16 @@ export function countWordsAfterSignalWord(arrayTranscript) {
 
 export function extractFirstNumberInStringArray(arrayTranscript) {
     let mySteps = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-    console.log(".." + arrayTranscript);
+
     let arrayWithOnlyNumbers = arrayTranscript.filter(function (element) {
         return mySteps.includes(element)
     });
-
-    console.log("...." + arrayWithOnlyNumbers);
-    if (arrayWithOnlyNumbers.length > 0)
-        return arrayWithOnlyNumbers[0];
-    else
-        return 1
+    console.log("Zahl: " + arrayWithOnlyNumbers[0]);
+    if (arrayWithOnlyNumbers.length > 0) return arrayWithOnlyNumbers[0]; else return 1
 }
 
-
 export function getCommandToVoiceCommand(command) {
+    console.log("Command: " + command)
     switch (command) {
         case 'zoom in':
             return ("zoomIn");
