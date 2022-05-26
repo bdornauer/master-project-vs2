@@ -13,26 +13,26 @@ export function Header() {
                     <Image
                         alt=""
                         src={keyboardIcon}
-                        width="50"
-                        height="30"
+                        width="60"
+                        height="40"
                     />
                     <Image
                         alt=""
                         src={speechIcon}
-                        width="30"
-                        height="30"
+                        width="40"
+                        height="40"
                     />
                     <Image
                         alt=""
                         src={gestureIcon}
-                        width="40"
-                        height="30"
+                        width="50"
+                        height="40"
                     />
                     <Image
                         alt=""
                         src={multimodalIcon}
-                        width="40"
-                        height="30"
+                        width="50"
+                        height="40"
                     />
                 </Navbar.Brand>
                 <Navbar.Brand style={{color: Colors.fontColor}} href="/">Dicom-Controller</Navbar.Brand>

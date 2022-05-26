@@ -7,8 +7,7 @@ export function Datenschutz() {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    return (
-        <div>
+    return (<div>
             <Button onClick={handleShow} variant="secondary">
                 Datenschutz & Impressium
             </Button>
@@ -505,6 +504,5 @@ export function Datenschutz() {
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
-    );
+        </div>);
 }

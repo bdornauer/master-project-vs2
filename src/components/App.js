@@ -91,7 +91,7 @@ export function App() {
                     <h1>Willkommen beim ersten multimodalen, berührunglosen Dicom-Web-Viewer!</h1>
                     <div>
                         <div className="CardsContainer">
-                            <CardGroup as="CardsContainer">
+                            <CardGroup >
                                 {cards}
                             </CardGroup>
                         </div>

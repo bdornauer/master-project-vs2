@@ -34,8 +34,8 @@ const config = {
 const DICOM_brain = 'wadouri:./sampleMedicalImages/DICOM_brain.DCM';
 const DICOM_spine = 'wadouri:./sampleMedicalImages/DICOM_spine.DCM';
 const DICOM_spine_section = 'wadouri:./sampleMedicalImages/DICOM_spine_section.DCM';
-const JPG_Renal_Cell_Carcinoma = './sampleMedicalImages/JPG_Renal_Cell_Carcinoma.jpeg';
-const PNG_brain = './sampleMedicalImages/PNG_brain.png';
+const JPG_Renal_Cell_Carcinoma = 'http://localhost:3000//sampleMedicalImages/JPG_Renal_Cell_Carcinoma.jpeg';
+const PNG_brain = 'http://localhost:3000/sampleMedicalImages/PNG_brain.png';
 
 
 export default {

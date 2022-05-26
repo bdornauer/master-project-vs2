@@ -7,7 +7,8 @@ import * as handTrack from 'handtrackjs';
 import {BsCameraVideo, BsCameraVideoOff, BsFillMicFill, BsFillMicMuteFill, BsMic, BsMicMute} from "react-icons/bs";
 import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
 import confirmSound from "../assets/confirmSound.wav"
-import JsPDF from 'jspdf';
+
+
 //Webcam
 import {
     filterPinchAndClosedHandGesture,
@@ -33,6 +34,8 @@ import {
 } from "./controllers/SpeechController";
 import useSound from "use-sound";
 import {InformationController} from "./informationController/InformationController";
+
+import Styles from "./WebController.css"
 
 export function WebController(props) {
     const [play] = useSound(confirmSound);
@@ -303,7 +306,8 @@ export function WebController(props) {
     /****************************************************************************************************
      * VIEW
      *************************************************************************************************** */
-    return (<Container style={{maxWidth: '100%', maxHeight: '100%'}}>
+    return (
+        <Container style={{maxWidth: '100%', maxHeight: '100%'}}>
         <Row>
             <Header/>
         </Row>
@@ -383,6 +387,10 @@ export function WebController(props) {
                     </Modal.Footer>
                 </Modal>
             </>
+
         </Row>
+
+
+
     </Container>);
 }

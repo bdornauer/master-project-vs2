@@ -6,16 +6,15 @@ import arrowUp from '../../assets/icons/arrowUp.svg'
 import arrowDown from '../../assets/icons/arrowDown.svg'
 import contrastMinus from '../../assets/icons/brightnessMinus.svg'
 import contrastPlus from '../../assets/icons/brightnessPlus.svg'
-import menu1 from '../../assets/icons/menu1.svg'
-import menu2 from '../../assets/icons/menu2.svg'
-import minus from '../../assets/icons/minus.svg'
-import plus from '../../assets/icons/plus.svg'
 import saturationMinus from '../../assets/icons/saturationMinus.svg'
 import saturationPlus from '../../assets/icons/saturationPlus.svg'
 import zoomIn from '../../assets/icons/ZoomIn.svg'
 import zoomOut from '../../assets/icons/ZoomOut.svg'
 import invert from '../../assets/icons/invert.svg'
 import cancel from '../../assets/icons/cancel.svg'
+import turnLeft from '../../assets/icons/turnLeft.svg'
+import turnRight from "../../assets/icons/turnRight.svg"
+
 import Icon from "./Icon";
 
 //Show
@@ -23,67 +22,7 @@ import css from './CommandBar.css';
 
 
 function CommandBar(props) {
-    const iconSetting = {width: 70, height: 70};
-
-    useEffect(() => {
-        switch (props.selectedCommand) {
-            case "":
-                setActiveStatus(standardActivation);
-                break;
-            case "zoomIn":
-                setActiveStatus(prevState => ({...prevState, zoomInActive: true}));
-                break;
-            case "zoomOut":
-                setActiveStatus(prevState => ({...prevState, zoomOutActive: true}));
-                break;
-            case "goLeft":
-                setActiveStatus(prevState => ({...prevState, goLeftActive: true}));
-                break;
-            case "goUp":
-                setActiveStatus(prevState => ({...prevState, goUpActive: true}));
-                break;
-            case "goDown":
-                setActiveStatus(prevState => ({...prevState, goDownActive: true}));
-                break;
-            case "goRight":
-                setActiveStatus(prevState => ({...prevState, goRightActive: true}));
-                break;
-            case "layerUp":
-                setActiveStatus(prevState => ({...prevState, layerUpActive: true}));
-                break;
-            case "layerDown":
-                setActiveStatus(prevState => ({...prevState, layerDownActive: true}));
-                break;
-            case "brightnessDown":
-                setActiveStatus(prevState => ({...prevState, brigthnessDownActive: true}));
-                break;
-            case "brightnessUp":
-                setActiveStatus(prevState => ({...prevState, brigthnessUpActive: true}));
-                break;
-            case "saturationDown":
-                setActiveStatus(prevState => ({...prevState, saturationDownActive: true}));
-                break;
-            case "saturationUp":
-                setActiveStatus(prevState => ({...prevState, saturationUpActive: true}));
-                break;
-            case "invert":
-                setActiveStatus(prevState => ({...prevState, invertActive: true}));
-                break;
-            case "default":
-                console.log("ok")
-                setActiveStatus(prevState => ({...prevState, defaultActive: true}));
-                break;
-            default:
-                break;
-        }
-    }, [props.selectedCommand])
-
-    useEffect(() => {
-        switch (props.switchMenu) {
-
-
-        }
-    }, [props.switchMenu])
+    const iconSetting = {width: 60, height: 60};
 
     const standardActivation = {
         zoomInActive: false,
@@ -102,60 +41,83 @@ function CommandBar(props) {
         cancelActive: false,
         menu1Active: false,
         menu2Active: false,
+        turnLeftActive: false,
+        turnRightActive: false,
     }
-
 
     const [activeStatus, setActiveStatus] = useState(
         standardActivation
     );
 
-    function switchMenu() {
-        setActiveStatus(prevState => ({
-            ...prevState, menu1Active: !prevState.menu1Active
-        }));
+    useEffect(() => {
+        switch (props.selectedCommand) {
+            case "":
+                break;
+            case "zoomIn":
+                activateButton("zoomInActive");
+                break;
+            case "zoomOut":
+                activateButton("zoomOutActive");
+                break;
+            case "goLeft":
+                activateButton("goLeftActive");
+                break;
+            case "goUp":
+                activateButton("goUpActive");
+                break;
+            case "goDown":
+                activateButton("goDownActive");
+                break;
+            case "goRight":
+                activateButton("goRightActive");
+                break;
+            case "layerUp":
+                activateButton("layerUpActive");
+                break;
+            case "layerDown":
+                activateButton("layerDownActive");
+                break;
+            case "brightnessDown":
+                activateButton("brigthnessDownActive");
+                break;
+            case "brightnessUp":
+                activateButton("brigthnessUpActive");
+                break;
+            case "saturationDown":
+                activateButton("saturationDownActive");
+                break;
+            case "saturationUp":
+                activateButton("saturationUpActive");
+                break;
+            case "invert":
+                activateButton("invertActive");
+                break;
+            case "default":
+                activateButton("defaultActive");
+                break;
+            case "turnLeft":
+                activateButton("turnLeftActive");
+                break;
+            case "turnRight":
+                activateButton("turnRightActive");
+                break;
+            default:
+                break;
+        }
+    }, [props.selectedCommand])
+
+    function activateButton(name){
+        setActiveStatus(prevState => ({...prevState, [name]: true}));
+
+        setTimeout(function(){
+            setActiveStatus(prevState=> ({...prevState, [name]: false}));
+        }, 300);
     }
 
-    function menuBar1() {
-        return (<>
-            <Icon icon={zoomIn} isActive={activeStatus.zoomInActive} width={iconSetting.width}
-                  height={iconSetting.height}/>
-            <Icon icon={zoomOut} isActive={activeStatus.zoomOutActive} width={iconSetting.width}
-                  height={iconSetting.height}/>
-            <Icon icon={arrowLeft} isActive={activeStatus.goLeftActive} width={iconSetting.width}
-                  height={iconSetting.height}/>
-            <Icon icon={arrowUp} isActive={activeStatus.goUpActive} width={iconSetting.width}
-                  height={iconSetting.height}/>
-            <Icon icon={arrowDown} isActive={activeStatus.goDownActive} width={iconSetting.width}
-                  height={iconSetting.height}/>
-            <Icon icon={arrowRight} isActive={activeStatus.goRightActive} width={iconSetting.width}
-                  height={iconSetting.height}/>
-            <Icon icon={plus} isActive={activeStatus.layerUpActive} width={iconSetting.width}
-                  height={iconSetting.height}/>
-            <Icon icon={minus} isActive={activeStatus.layerDownActive} width={iconSetting.width}
-                  height={iconSetting.height}/>
-            <Icon icon={menu2} isActive={activeStatus.menu1Active} width={iconSetting.width}
-                  height={iconSetting.height}/></>)
-    }
 
-    function menuBar2() {
-        return (<>
-                <Icon icon={saturationMinus} isActive={activeStatus.brigthnessDownActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
-                <Icon icon={saturationPlus} isActive={activeStatus.brigthnessUpActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
-                <Icon icon={contrastMinus} isActive={activeStatus.saturationDownActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
-                <Icon icon={contrastPlus} isActive={activeStatus.saturationUpActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
-                <Icon icon={invert} isActive={activeStatus.invertActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
-                <Icon icon={cancel} isActive={activeStatus.defaultActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
-                <Icon icon={menu1} isActive={activeStatus.menu1Active} width={iconSetting.width}
-                      height={iconSetting.height}/></>
 
-        )
-    }
+
+
 
     function menuBarTotal() {
         return (<>
@@ -171,10 +133,6 @@ function CommandBar(props) {
                       height={iconSetting.height}/>
                 <Icon icon={arrowRight} isActive={activeStatus.goRightActive} width={iconSetting.width}
                       height={iconSetting.height}/>
-                <Icon icon={minus} isActive={activeStatus.layerDownActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
-                <Icon icon={plus} isActive={activeStatus.layerUpActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
                 <Icon icon={saturationMinus} isActive={activeStatus.brigthnessDownActive} width={iconSetting.width}
                       height={iconSetting.height}/>
                 <Icon icon={saturationPlus} isActive={activeStatus.brigthnessUpActive} width={iconSetting.width}
@@ -185,15 +143,21 @@ function CommandBar(props) {
                       height={iconSetting.height}/>
                 <Icon icon={invert} isActive={activeStatus.invertActive} width={iconSetting.width}
                       height={iconSetting.height}/>
-                <Icon icon={cancel} isActive={activeStatus.defaultActive} width={iconSetting.width}
-                      height={iconSetting.height}/></>
+                <Icon icon={cancel} isActive={activeStatus.cancelActive} width={iconSetting.width}
+                      height={iconSetting.height}/>
+                <Icon icon={turnLeft} isActive={activeStatus.turnLeftActive} width={iconSetting.width}
+                      height={iconSetting.height}/>
+                <Icon icon={turnRight} isActive={activeStatus.turnRightActive} width={iconSetting.width}
+                      height={iconSetting.height}/>
+
+            </>
         )
     }
 
     return (
         <div style={{margin: "20px"}}>
             <div className={css.containerIcons}>
-                {props.switchMenu ? (activeStatus.menu1Active ? menuBar2() : menuBar1()) : menuBarTotal()}
+                {menuBarTotal()}
             </div>
         </div>
     )
