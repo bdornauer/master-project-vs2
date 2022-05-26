@@ -1,5 +1,6 @@
 import React from 'react';
 import {useState} from "react";
+
 import speechIcon from "../assets/logos/speechIcon.svg"
 import keyboardIcon from "../assets/logos/keyboardIcon.svg"
 import gestureIcon from "../assets/logos/gestureIcon.svg"
@@ -10,7 +11,10 @@ import Colors from "./Colors";
 import "../css/Welcome.css"
 import {WebController} from "./WebController";
 
-export function Welcome() {
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+
+export function App() {
     const [hover1, setHover1] = useState(true);
     const [hover2, setHover2] = useState(true);
     const [hover3, setHover3] = useState(true);
@@ -99,7 +103,9 @@ export function Welcome() {
     }
 
     return (
-        <SwtichModus/>
+        <div className="App">
+            <SwtichModus/>
+        </div>
     );
 }
 

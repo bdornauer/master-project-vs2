@@ -6,7 +6,7 @@ import {Header} from "./Header";
 import * as handTrack from 'handtrackjs';
 import {BsCameraVideo, BsCameraVideoOff, BsFillMicFill, BsFillMicMuteFill, BsMic, BsMicMute} from "react-icons/bs";
 import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
-import confirmSound from "../assets/confirm.wav"
+import confirmSound from "../assets/confirmSound.wav"
 import JsPDF from 'jspdf';
 //Webcam
 import {
@@ -32,7 +32,7 @@ import {
     transcriptToLowerCase
 } from "./controllers/SpeechController";
 import useSound from "use-sound";
-import {HelpPage} from "./HelpPage";
+import {InformationController} from "./informationController/InformationController";
 
 export function WebController(props) {
     const [play] = useSound(confirmSound);
@@ -374,7 +374,7 @@ export function WebController(props) {
                         <Modal.Title>Beschreibung der Funktionalitäten</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <HelpPage/>
+                        <InformationController/>
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={handleClose}>
