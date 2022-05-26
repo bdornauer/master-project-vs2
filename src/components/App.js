@@ -6,56 +6,56 @@ import keyboardIcon from "../assets/logos/keyboardIcon.svg"
 import gestureIcon from "../assets/logos/gestureIcon.svg"
 import multiModalIcon from "../assets/logos/multimodalIcon.svg"
 
-import {Card, Col, Row} from "react-bootstrap";
+import {Card, CardGroup, Col, Row} from "react-bootstrap";
 import Colors from "./Colors";
-import "../css/Welcome.css"
 import {WebController} from "./WebController";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import {Datenschutz} from "./Datenschutz";
 
 export function App() {
     const [hover1, setHover1] = useState(true);
     const [hover2, setHover2] = useState(true);
     const [hover3, setHover3] = useState(true);
     const [hover4, setHover4] = useState(true);
-    const [hover5, setHover5] = useState(true);
+
     const [selectModus, setSelectedModus] = useState("");
     const [modusActive, setIsModusActive] = useState(false);
 
-    let cardsHover = [hover1, hover2, hover3, hover4, hover5]
-    let setCardsHover = [setHover1, setHover2, setHover3, setHover4, setHover5]
+    let cardsHover = [hover1, hover2, hover3, hover4]
+    let setCardsHover = [setHover1, setHover2, setHover3, setHover4]
 
     let cardStyle = (hover) => ({
         backgroundColor: hover ? Colors.blue : Colors.darkblue,
+        margin: "1%"
     })
 
     let controllers = [
         {
             id: "simple",
             img: keyboardIcon,
-            header: "Keyboard-Controller",
-            body: "Mit Hilfe von einzelnen Tasten auf der Tastatur kann der DICOM-Viewer gesteuert werden.",
+            header: "Tastatureingabe",
+            body: "Mit Hilfe der einzelnen Tasten auf der Tastatur kann der DICOM-Viewer kontrolliert werden.",
         }, {
             id: "speech",
             img: speechIcon,
-            header: "Speech-Controller",
-            body: "Mit Hilfe von ausgsprochenen Befehlen können Einstellung beim  DICOM-Viewer druchgeführt werden. ",
+            header: "Sprachsteuerung",
+            body: "Mit Hilfe von ausgsprochenen Befehlen können Einstellungen beim  DICOM-Viewer umgesetzt werden.",
         }, {
             id: "gesture",
             img: gestureIcon,
-            header: "Gesten-Erkennung",
-            body: "Über die Handposition, sowie die Gesterkennung können die Befehle für den DICOM-Viewer umgesetzt werden.",
-        }, , {
+            header: "Handsteuerung",
+            body: "Über die Handposition, sowie die Gestenerkennung ist die Steuerung des DICOM-Viewer möglich.",
+        }, {
             id: "multimodal",
             img: multiModalIcon,
             header: "Multimodal",
-            body: "Sowohl Keyboard-, Gesten- und Sprachsteuerung können gemeinsam genutzt werden.",
+            body: "Sowohl Keyboard-, Gesten- und Sprachsteuerung können multimodal (gemeinsam) verwendet werden.",
         }
     ]
 
     let cards = controllers.map((e, index) => (
-        <Col>
             <Card
                 className="Card"
                 style={cardStyle(cardsHover[index])}
@@ -78,7 +78,7 @@ export function App() {
                     </Card.Text>
                 </Card.Body>
             </Card>
-        </Col>
+
     ));
 
     function SwtichModus() {
@@ -87,14 +87,13 @@ export function App() {
         } else {
             return (
                 <div className="Welcome">
+                    <br/>
                     <h1>Willkommen beim ersten multimodalen, berührunglosen Dicom-Web-Viewer!</h1>
-                    {/*<ReactLoading type={"cubes"} height={'5%'} color="#000000"/>*/
-                    }
                     <div>
                         <div className="CardsContainer">
-                            <Row>
+                            <CardGroup as="CardsContainer">
                                 {cards}
-                            </Row>
+                            </CardGroup>
                         </div>
                     </div>
                 </div>
@@ -105,6 +104,7 @@ export function App() {
     return (
         <div className="App">
             <SwtichModus/>
+            <Datenschutz/>
         </div>
     );
 }
