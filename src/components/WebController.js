@@ -53,7 +53,7 @@ export function WebController(props) {
     const [currentPrediction, setCurrentPredictionString] = useState("")
     const [screenWidth] = useState(window.innerWidth * 0.42) //640
     const [screenHeight] = useState(screenWidth * 0.75) //480
-    const [iconSize] = useState(70)
+    const [iconSize] = useState(screenWidth*0.12)
     const [showTime, setShowTime] = useState(70)
 
     //Micro
@@ -164,7 +164,7 @@ export function WebController(props) {
         } else {
             stop()
         }
-    }, [ webcamOn])
+    }, [webcamOn])
 
     function detectHandsInVideo() {
         model.detect(video.current).then(predictions => {
@@ -308,89 +308,97 @@ export function WebController(props) {
      *************************************************************************************************** */
     return (
         <Container style={{maxWidth: '100%', maxHeight: '100%'}}>
-        <Row>
-            <Header/>
-        </Row>
-        <Row>
-            <CommandBar selectedCommand={selectedCommand}/>
-        </Row>
-        <Row>
-            <Col xs={6}>
-                <div style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px", alignContent: "center"}}>
-                    <ButtonGroup className="mb-3">
-                        <Button variant="secondary"
-                                style={micOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
-                                onClick={() => micOn ? stopListening() : startListening()}>
-                            {micOn ? <BsMic/> : <BsMicMute/>}
-                            Micro
-                        </Button>
-                        <Button variant="secondary"
-                                style={webcamOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
-                                onClick={() => webcamOn ? setWebcamOn(false) : setWebcamOn(true)}>
-                            {webcamOn ? <BsCameraVideo/> : <BsCameraVideoOff/>}
-                            Webcam
-                        </Button>
-                        <Button variant="secondary" onClick={handleShow}>
-                            Information
-                        </Button>
-                    </ButtonGroup>
-                    <div>
-                        <ListGroup componentClass="ul" style={{padding: "3%"}}>
-                            <ListGroupItem>
-                                Eingabe: {transcript}
-                            </ListGroupItem>
-                        </ListGroup>
-                    </div>
-
-                    <div>
-                        <div style={{
-                            position: "relative", width: screenWidth, height: screenHeight,
-                        }}>
-                            <canvas ref={canvas} width={screenWidth} height={screenHeight}
-                                    style={{
-                                        position: "absolute", top: "0", left: "0", zIndex: "0",
-                                    }}/>
-                            <canvas ref={grid} width={screenWidth} height={screenHeight}
-                                    style={{
-                                        position: "absolute", left: "0", top: "0", zIndex: "1",
-                                    }}/>
-                            <canvas ref={highlighting} width={screenWidth} height={screenHeight}
-                                    style={{
-                                        position: "absolute", left: "0", top: "0", zIndex: "2",
-                                    }}/>
-                            <canvas ref={iconsLayer} width={screenWidth} height={screenHeight}
-                                    style={{
-                                        position: "absolute", left: "0", top: "0", zIndex: "2",
-                                    }}/>
+            <Row>
+                <Header/>
+            </Row>
+            <Row>
+                <CommandBar selectedCommand={selectedCommand}/>
+            </Row>
+            <Row>
+                <Col xs={6}>
+                    <div style={{
+                        padding: "3%",
+                        border: "5px solid #1C6EA4",
+                        borderRadius: "14px",
+                        alignContent: "center"
+                    }}>
+                        <ButtonGroup className="mb-3">
+                            <Button variant="secondary"
+                                    style={micOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
+                                    onClick={() => micOn ? stopListening() : startListening()}>
+                                {micOn ? <BsMic/> : <BsMicMute/>}
+                                Micro
+                            </Button>
+                            <Button variant="secondary"
+                                    style={webcamOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
+                                    onClick={() => webcamOn ? setWebcamOn(false) : setWebcamOn(true)}>
+                                {webcamOn ? <BsCameraVideo/> : <BsCameraVideoOff/>}
+                                Webcam
+                            </Button>
+                            <Button variant="secondary" onClick={handleShow}>
+                                Information
+                            </Button>
+                        </ButtonGroup>
+                        <div>
+                            <ListGroup componentClass="ul" style={{padding: "3%"}}>
+                                <ListGroupItem>
+                                    Eingabe: {transcript}
+                                </ListGroupItem>
+                            </ListGroup>
                         </div>
-                        <video ref={video} width={screenWidth} height={screenHeight}
-                               style={{visibility: "hidden"}}/>
+
+                        <div>
+                            <div style={{
+                                position: "relative", width: screenWidth, height: screenHeight,
+                            }}>
+                                <video ref={video} width={screenWidth} height={screenHeight} style={{
+                                    position: "absolute",
+                                    top: "0",
+                                    left: "0"
+                                }}/>
+                                <canvas ref={canvas} width={screenWidth} height={screenHeight}
+                                        style={{
+                                            position: "absolute", top: "0", left: "0", zIndex: "0",
+                                        }}/>
+                                <canvas ref={grid} width={screenWidth} height={screenHeight}
+                                        style={{
+                                            position: "absolute", left: "0", top: "0", zIndex: "1",
+                                        }}/>
+                                <canvas ref={highlighting} width={screenWidth} height={screenHeight}
+                                        style={{
+                                            position: "absolute", left: "0", top: "0", zIndex: "2",
+                                        }}/>
+                                <canvas ref={iconsLayer} width={screenWidth} height={screenHeight}
+                                        style={{
+                                            position: "absolute", left: "0", top: "0", zIndex: "2",
+                                        }}/>
+                            </div>
+
+                        </div>
                     </div>
-                </div>
-            </Col>
-            <Col xs={6} style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
-                <DicomViewer selectedCommand={selectedCommand} steps={steps}/>
-            </Col>
-            <>
-                <Modal show={show} onHide={handleClose} size={"xl"} aria-labelledby="contained-modal-title-vcenter"
-                       media="print" centered>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Beschreibung der Funktionalitäten</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <InformationController/>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleClose}>
-                            Close
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-            </>
+                </Col>
+                <Col xs={6} style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
+                    <DicomViewer selectedCommand={selectedCommand} steps={steps}/>
+                </Col>
+                <>
+                    <Modal show={show} onHide={handleClose} size={"xl"} aria-labelledby="contained-modal-title-vcenter"
+                           media="print" centered>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Beschreibung der Funktionalitäten</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <InformationController/>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={handleClose}>
+                                Close
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+                </>
 
-        </Row>
-
+            </Row>
 
 
-    </Container>);
+        </Container>);
 }
