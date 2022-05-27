@@ -334,7 +334,6 @@ function DicomViewer(props) {
         let dicomElement = document.getElementById('dicomImage');
         const file = e.target.files[0];
         const fileType = file.type;
-
         let imageId;
 
         if (fileType === "image/jpeg" || fileType === "image/png") {
