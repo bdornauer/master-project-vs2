@@ -16,13 +16,6 @@ import turnLeft from "../../assets/icons/turnLeft.svg"
 import turnRight from "../../assets/icons/turnRight.svg"
 import Colors from "../Colors";
 
-function drawIcon(ctx, icon, x, y, width, height) {
-    let img = new Image();
-    img.src = icon;
-    img.onload = function () {
-        ctx.drawImage(img, x, y, width, height);
-    }
-}
 
 /**
  * in a 640x480 pixel grid
@@ -86,91 +79,130 @@ export function containsPrediction(array) {
     return array !== undefined && array.length >= 1;
 }
 
-export function higlichtSection(highlighting, x, y, sectionWidth, sectionHeight, screenWidth, screenHeight) {
+/**
+ * Higlights a section, drawing a semitransperecent rectangle over it.
+ * @param highlighting canvas layer
+ * @param xLeftTopCorner LeftTop corner xLeftTopCorner-coordinate
+ * @param yLeftTopCorner LeftTop corner yLeftTopCorner-coordinate
+ */
+export function higlightSection(highlighting, xLeftTopCorner, yLeftTopCorner, sectionWidth, sectionHeight, screenWidth, screenHeight) {
     removeCanvasLayer(highlighting, screenWidth, screenHeight)
     let ctx = highlighting.current.getContext('2d');
     ctx.beginPath();
-    ctx.rect(x, y, sectionWidth, sectionHeight);
+    ctx.rect(xLeftTopCorner, yLeftTopCorner, sectionWidth, sectionHeight);
     ctx.lineWidth = 0
     ctx.fillStyle = Colors.brightBlueSemiTransprerent;
     ctx.fill();
     ctx.stroke();
 }
 
-export function highlightSectionActive(gridSection, highlighting, screenWidth, screenHeight) {
+/**
+ * Higlights the selected grid sections with a semitransperecent rectangle
+ * @param highlighting specific canvas
+ */
+export function highlightSectionActive(gridSectionName, highlighting, screenWidth, screenHeight) {
     const sectionWidth = screenWidth / 3;
     const sectionHeight = screenHeight / 3;
 
-    switch (gridSection) {
+    switch (gridSectionName) {
         case "topLeft":
-            higlichtSection(highlighting, 0, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, 0, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         case "topCenter":
-            higlichtSection(highlighting, sectionWidth, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, sectionWidth, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         case "topRight":
-            higlichtSection(highlighting, 2*sectionWidth, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, 2 * sectionWidth, 0, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         case "centerLeft":
-            higlichtSection(highlighting, 0, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, 0, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         case "centerCenter":
-            higlichtSection(highlighting, sectionWidth, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, sectionWidth, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         case "centerRight":
-            higlichtSection(highlighting, 2 * sectionWidth, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, 2 * sectionWidth, sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         case "bottomLeft":
-            higlichtSection(highlighting, 0, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, 0, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         case "bottomCenter":
-            higlichtSection(highlighting, sectionWidth, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, sectionWidth, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         case "bottomRight":
-            higlichtSection(highlighting, 2 * sectionWidth, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
+            higlightSection(highlighting, 2 * sectionWidth, 2 * sectionHeight, sectionWidth, sectionHeight, screenWidth, screenHeight)
             break;
         default:
-            removeCanvasLayer(highlighting,screenWidth, screenHeight);
+            removeCanvasLayer(highlighting, screenWidth, screenHeight);
     }
 }
 
-
-export function removeCanvasLayer(canvas, screenWidth, screenHeight) {
+/**
+ * Removes all drawing of canvas layer
+ */
+export function removeCanvasLayer(canvas, canvasWidth, canvasHeight) {
     let ctx = canvas.current.getContext('2d');
-    ctx.clearRect(0, 0, screenWidth, screenHeight);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 }
 
-export function drawGridOverlay(grid, screenWidth, screenHeight) {
+/**
+ * Draws the lines for the grid
+ * @param grid
+ * @param canvasWidth
+ * @param canvasHeight
+ */
+export function drawGridOverlay(grid, canvasWidth, canvasHeight) {
     let ctx = grid.current.getContext('2d');
-    let stepsWidth = screenWidth / 3;
-    let stepsHeight = screenHeight / 3;
+    let stepsWidth = canvasWidth / 3;
+    let stepsHeight = canvasHeight / 3;
     ctx.beginPath();
     ctx.lineWidth = 5;
     ctx.strokeStyle = Colors.brightBlue;
     //horiziontal lines
     for (let i = 0; i < 4; i++) {
         ctx.moveTo(stepsWidth * i, 0);
-        ctx.lineTo(stepsWidth * i, screenHeight);
+        ctx.lineTo(stepsWidth * i, canvasHeight);
     }
 
     //vertical lines
     for (let i = 0; i < 4; i++) {
         ctx.moveTo(0, stepsHeight * i);
-        ctx.lineTo(screenWidth, stepsHeight * i);
+        ctx.lineTo(canvasWidth, stepsHeight * i);
     }
     ctx.stroke();
 };
 
-/** closedHand means that the hand is open (a bit confusing)*/
+/**
+ * Filters the two gestures: pinch and open hand
+ */
 export function filterPinchAndOpenHandGesture(array) {
     if (array !== undefined && array.length >= 1) {
-        return array.filter(element => element.label === "pinch" || element.label === "closed");
+        return array.filter(element => element.label === "pinch" || element.label === "closed"); //ATTENTION: closed means open hand
     } else {
         return []
     }
 }
 
+/**
+ * Draws an icon at specific position
+ * @param ctx canvas context to draw on
+ * @param icon object
+ * @param x leftTopCorner position
+ * @param y leftTopCorner position
+ * @param width  of icion
+ * @param height of icon
+ */
+function drawIcon(ctx, icon, x, y, width, height) {
+    let img = new Image();
+    img.src = icon;
+    img.onload = function () {
+        ctx.drawImage(img, x, y, width, height);
+    }
+}
 
+/**
+ * Draw specific icons, if menu 1 is selected
+ */
 export function drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight) {
     let sectionVertical = screenHeight / 6;
     let sectionHorizontal = screenWidth / 6;
@@ -187,6 +219,9 @@ export function drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight) 
     drawIcon(ctx, contrastPlus, 5 * sectionHorizontal - halfSizeIcon, 5 * sectionVertical, iconSize, iconSize);
 }
 
+/**
+ * Draw specific icons, if menu 2 is selected
+ */
 export function drawIconsMenu2(iconsLayer, iconSize, screenWidth, screenHeight) {
     let sectionVertical = screenHeight / 6;
     let sectionHorizontal = screenWidth / 6;
