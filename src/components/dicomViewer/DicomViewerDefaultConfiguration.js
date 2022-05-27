@@ -3,10 +3,6 @@ import Colors from '../Colors'
 const defaultViewport = {
     invert: false,
     pixelReplication: false,
-    voi: {
-        windowWidth: 400,
-        windowCenter: 200
-    },
     scale: 1,
     translation: {
         x: 0,

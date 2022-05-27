@@ -284,7 +284,7 @@ export function WebController(props) {
     }
 
     /****************************************************************************************************
-     * MOUSE Controller
+     * Keyboard Controller
      *************************************************************************************************** */
     /**
      * pressedKeyAction depended on the pressed key, the selectedCommand is set to the specific value
@@ -297,7 +297,7 @@ export function WebController(props) {
 
         setTimeout(() => {
             setSelectedCommand("");
-        }, 200);
+        }, 50);
 
         let commandToKey = keySelectionCommand(pressedKey.key);
         setSelectedCommand(commandToKey);
