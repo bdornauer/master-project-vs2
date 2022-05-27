@@ -37,6 +37,14 @@ function drawIcon(ctx, icon, x, y, width, height) {
  * 4: centerLeft 5:centerCenter 6:centerRight
  * 7: bottomLeft 8:bottomCenter 9:bottomRight
  */
+/**
+ *
+ * @param xPosition
+ * @param yPosition
+ * @param screenWidth
+ * @param screenHeight
+ * @returns {string}
+ */
 export function positionInGrid(xPosition, yPosition, screenWidth, screenHeight) {
     //top to bottom
     let gridName = "nothing detected";
@@ -74,7 +82,7 @@ export function predictionPositionToString(xPosition, yPosition) {
     return "(" + Math.round(xPosition) + ", " + Math.round(yPosition) + ")"
 }
 
-export function containsPredictions(array) {
+export function containsPrediction(array) {
     return array !== undefined && array.length >= 1;
 }
 
@@ -154,7 +162,7 @@ export function drawGridOverlay(grid, screenWidth, screenHeight) {
 };
 
 /** closedHand means that the hand is open (a bit confusing)*/
-export function filterPinchAndClosedHandGesture(array) {
+export function filterPinchAndOpenHandGesture(array) {
     if (array !== undefined && array.length >= 1) {
         return array.filter(element => element.label === "pinch" || element.label === "closed");
     } else {

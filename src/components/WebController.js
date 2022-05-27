@@ -9,9 +9,9 @@ import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition'
 import confirmSound from "../assets/confirmSound.wav"
 
 import {
-    filterPinchAndClosedHandGesture,
+    filterPinchAndOpenHandGesture,
     calculateCenterOfBBox,
-    containsPredictions,
+    containsPrediction,
     positionInGrid,
     drawIconsMenu1,
     drawIconsMenu2,
@@ -59,7 +59,7 @@ export function WebController(props) {
     const {transcript, resetTranscript} = useSpeechRecognition();
     const [playConfirmSound] = useSound(confirmSound);
     const [isSignalWordDetected, setIsSignalWordDetected] = useState(false)
-    const [steps, setSteps] = useState(false)
+    const [steps, setSteps] = useState(1)
 
     //information Modal
     const [showInformation, setShowInformation] = useState(false);
@@ -91,42 +91,48 @@ export function WebController(props) {
         SpeechRecognition.stopListening()
     }
 
-    //runs if new voice input is detected
+    /**
+     * runs if new voice input is detected
+     */
     useEffect(() => {
         //extract information from transcript (1)
         let transcriptLowerCase = stringTranscriptToLowerCase(transcript);
         let arrayTranscript = transcriptToWordArray(transcriptLowerCase);
         let filteredArrayTranscript = filterCommands(arrayTranscript);
 
+        //check Singalword and remove every senctences
         if (containsSignalWord(filteredArrayTranscript)) {
             playConfirmSound();
             setIsSignalWordDetected(true)
             resetTranscript();
-        } else {
-            if(isSignalWordDetected){
-                //extract command information from transcript (2)
-                const stepsExtracted = extractFirstNumberInStringArray(arrayTranscript)
-                const possibleCommand = filteredArrayTranscript.join(' ').toString();
-                const specificCommaned = setCommandFromVoiceCommand(possibleCommand);
+        }
 
-                //a valid command is detected
-                if (specificCommaned !== "") {
-                    setSteps(parseInt(stepsExtracted));
-                    setSelectedCommand(specificCommaned);
+        //if signalword was detected, check if valid command is in transcript
+        if (isSignalWordDetected) {
+            //extract command information from transcript (2)
+            const stepsExtracted = extractFirstNumberInStringArray(arrayTranscript)
+            const possibleCommand = filteredArrayTranscript.join(' ').toString();
+            const specificCommaned = setCommandFromVoiceCommand(possibleCommand);
+            setSteps(parseInt(stepsExtracted));
 
-                    setTimeout(() => {
-                        setSelectedCommand("");
-                    }, 200);
+            //a valid command is detected
+            if (specificCommaned !== "") {
+                setSelectedCommand(specificCommaned);
 
-                    resetTranscript();
-                }
-            }
+                setTimeout(() => {
+                    setSelectedCommand("");
+                }, 200);
 
-            // after 5 words after singal, singal word must be expressed again
-            if (arrayTranscript.length > 5) {
+                setIsSignalWordDetected(false)
                 resetTranscript();
-                setSteps(1);
             }
+        }
+
+        // after 5 words after singal, "Mike" word must be called again
+        if (arrayTranscript.length > 5) {
+            resetTranscript();
+            setIsSignalWordDetected(false)
+            setSteps(1);
         }
 
     }, [transcript]);
@@ -135,53 +141,49 @@ export function WebController(props) {
     /****************************************************************************************************
      * WEBCAM Controller
      *************************************************************************************************** */
+    useEffect(() => {
+        if (isWebcamOn || isWebcamInitNotDone && (props.modus === "gesture" || props.modus === "multimodal")) {
+            setIsWebcamInitNotDone(false);
+            startWebcam().then(() => detectHandsInVideo())
+        } else {
+            stopWebcam()
+        }
+    }, [isWebcamOn, props.modus])
+
     const eyeTrackingSettings = {
         flipHorizontal: true,   // flip e.g for video
         imageScaleFactor: 1,  // reduce input image size .
         maxNumBoxes: 5,        // maximum number of boxes to detect
     }
 
-    const start = async () => {
+    const startWebcam = async () => {
         setIsWebcamOn(true)
         model = await handTrack.load(eyeTrackingSettings);
         canvas2dContext = webcamLayer.current.getContext('2d');
-        console.log(webcamWidth)
         removeCanvasLayer(iconsLayer, webcamWidth, webcamHeight)
-        await handTrack.startVideo(video.current);
         drawGridOverlay(gridLayer, webcamWidth, webcamHeight);
         drawIconsMenu1(iconsLayer, iconSize, webcamWidth, webcamHeight);
+        await handTrack.startVideo(video.current);
     }
 
-    const stop = async () => {
+    const stopWebcam = async () => {
         setIsWebcamOn(false)
         await handTrack.stopVideo();
     }
 
-    const begin = async () => {
-        setIsWebcamOn(true)
-    }
-
-    useEffect(() => {
-        begin();
-        if (isWebcamOn || isWebcamInitNotDone && (props.modus === "gesture" || props.modus === "multimodal")) {
-            setIsWebcamInitNotDone(false);
-            start().then(() => detectHandsInVideo())
-        } else {
-            stop()
-        }
-    }, [isWebcamOn])
-
+    /**
+     * Detects position of hand and highlights them in a 3x3 grid.
+     */
     function detectHandsInVideo() {
         model.detect(video.current).then(predictions => {
-            const filteredPredictions = filterPinchAndClosedHandGesture(predictions);
-            //calculating the values to decide where
-            if (containsPredictions(filteredPredictions)) {
-                const bBox = filteredPredictions[0].bbox; //only get the first detected value
-                const centerOfBBox = calculateCenterOfBBox(bBox[0], bBox[1], bBox[2], bBox[3]) //position of pinch or closed Hand
-                const gridPosition = positionInGrid(centerOfBBox[0], centerOfBBox[1], webcamWidth, webcamHeight) //decided in 3x3 gridLayer were gesture ist detected
-                timePassed = performance.now() - startTime;
+            const filteredPredictions = filterPinchAndOpenHandGesture(predictions);
 
-                controlCommandPalet(gridPosition);
+            if (containsPrediction(filteredPredictions)) {
+                const bBox = filteredPredictions[0].bbox; //only get the first detected value
+                const centerOfBBox = calculateCenterOfBBox(bBox[0], bBox[1], bBox[2], bBox[3]) //calculate position of pinch or open Hand
+                const gridPosition = positionInGrid(centerOfBBox[0], centerOfBBox[1], webcamWidth, webcamHeight) //decided in 3x3 gridLayer were gesture ist detected e.g. topLeft
+                timePassed = performance.now() - startTime;
+                runSelectedCommand(gridPosition);
                 highlightSectionActive(gridPosition, highlightingLayer, webcamWidth, webcamHeight)
             } else {
                 startTime = performance.now();
@@ -194,10 +196,17 @@ export function WebController(props) {
         });
     }
 
-
-    function controlCommandPalet(gridSection) {
+    /**
+     * Perform control action by selected grid section.
+     * @param gridSection get position of section in grid
+     * @var timepassed only if detection is longer then 500 seconds, it will perform the command
+     */
+    function runSelectedCommand(gridSection) {
         let selection = "";
-        if (timePassed > 500) {
+
+        // min. 300 ms for normal command
+        // min. 500 ms for menu interchange
+        if (timePassed > 300 && ! (gridSection==="centerCenter" && timePassed < 500) ) {
             startTime = performance.now();
             timePassed = 0
             if (activeMenuNr === 1) {
@@ -268,12 +277,8 @@ export function WebController(props) {
                 }
             }
         }
-        setSteps(1);
 
-        setTimeout(() => {
-            setSelectedCommand("");
-        }, 200);
-
+        setSteps(1); //default value (needed for multimodal value)
         setSelectedCommand(selection);
 
     }
@@ -341,6 +346,18 @@ export function WebController(props) {
                         <ListGroup componentClass="ul" style={{padding: "3%"}}>
                             <ListGroupItem>
                                 Eingabe: {transcript}
+                                (
+                                {
+                                    isSignalWordDetected ?
+                                        <a style={{color: "green"}}>Active for command</a> :
+                                        <a style={{color: "red"}}>Say "Mike"</a>
+                                }
+                                , Steps:
+                                {
+                                    steps === 1 ? steps : <a style={{color: "red"}}>{steps}</a>
+                                }
+                                )
+
                             </ListGroupItem>
                         </ListGroup>
                     </div>
@@ -395,7 +412,5 @@ export function WebController(props) {
             </>
 
         </Row>
-
-
     </Container>);
 }

@@ -1,5 +1,5 @@
 const grammar = ["mike", "top", "down", "left", "right", "zoom", "in", "out",
-    "brightness", "increase", "decrease", "invert", "turn", "clockwise", "counter-clockwise", "default"];
+    "light", "increase", "decrease", "invert", "turn", "clockwise", "counter-clockwise", "default"];
 
 export function stringTranscriptToLowerCase(transcript) {
     return transcript.toLowerCase();
@@ -73,9 +73,9 @@ export function setCommandFromVoiceCommand(command) {
             return ("goDown");
         case 'right':
             return ("goRight");
-        case 'brightness decrease':
+        case 'light decrease':
             return ("brightnessDown");
-        case 'brightness increase':
+        case 'light increase':
             return ("brightnessUp");
         case 'saturation decrease':
             return ("saturationDown");
