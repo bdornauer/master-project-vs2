@@ -1,14 +1,19 @@
 const grammar = ["mike", "top", "down", "left", "right", "zoom", "in", "out",
     "brightness", "increase", "decrease", "invert", "turn", "clockwise", "counter-clockwise", "default"];
 
-export function transcriptToLowerCase(transcript) {
+export function stringTranscriptToLowerCase(transcript) {
     return transcript.toLowerCase();
 }
 
-export function transcriptToArray(transcript) {
+export function transcriptToWordArray(transcript) {
     return transcript.split(' ');
 }
 
+/**
+ * Filters all words, which are commands
+ * @param arrayTranscript
+ * @returns {*}
+ */
 export function filterCommands(arrayTranscript) {
     return arrayTranscript.filter(function (value) {
         return grammar.includes(value)
@@ -19,10 +24,11 @@ export function containsSignalWord(array) {
     return array.includes("mike")
 }
 
-export function getLast5Words(arrayTranscript) {
-    return (arrayTranscript.slice(0, 5))
-}
-
+/**
+ * Counts all words after signal "Mike"
+ * @param arrayTranscript
+ * @returns {number}
+ */
 export function countWordsAfterSignalWord(arrayTranscript) {
     let indexSignalWord = arrayTranscript.indexOf("mike");
     if (indexSignalWord === -1) {
@@ -33,6 +39,11 @@ export function countWordsAfterSignalWord(arrayTranscript) {
 
 }
 
+/**
+ * Extracts the first number 1 - 10 in an array
+ * @param arrayTranscript
+ * @returns {number|*}
+ */
 export function extractFirstNumberInStringArray(arrayTranscript) {
     let mySteps = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
@@ -43,8 +54,12 @@ export function extractFirstNumberInStringArray(arrayTranscript) {
     if (arrayWithOnlyNumbers.length > 0) return arrayWithOnlyNumbers[0]; else return 1
 }
 
-export function getCommandToVoiceCommand(command) {
-    console.log("Command: " + command)
+/**
+ * Each voice command is equivalent to a specific control command e.g. saturation decrease -> saturationDown
+ * @param command
+ * @returns {string}
+ */
+export function setCommandFromVoiceCommand(command) {
     switch (command) {
         case 'zoom in':
             return ("zoomIn");

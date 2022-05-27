@@ -8,8 +8,6 @@ import {BsCameraVideo, BsCameraVideoOff, BsMic, BsMicMute} from "react-icons/bs"
 import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
 import confirmSound from "../assets/confirmSound.wav"
 
-
-//Webcam
 import {
     filterPinchAndClosedHandGesture,
     calculateCenterOfBBox,
@@ -27,47 +25,49 @@ import {
     containsSignalWord,
     extractFirstNumberInStringArray,
     filterCommands,
-    getCommandToVoiceCommand,
-    transcriptToArray,
-    transcriptToLowerCase
+    setCommandFromVoiceCommand,
+    transcriptToWordArray,
+    stringTranscriptToLowerCase
 } from "./controllers/SpeechController";
-import useSound from "use-sound";
+
 import {InformationController} from "./informationController/InformationController";
 
+import useSound from "use-sound";
+
 export function WebController(props) {
-    const [play] = useSound(confirmSound);
 
-    const [micOn, setMicOn] = useState(false);
-    const [webcamOn, setWebcamOn] = useState(false);
-    const [steps, setSteps] = useState(1)
-
-    const [initWebcamOn, setInitWebcamOn] = useState(true);
+    //Select selection
+    const [isMicOn, setIsMicOn] = useState(false);
+    const [isWebcamOn, setIsWebcamOn] = useState(false);
 
     //General
     const [selectedCommand, setSelectedCommand] = useState("")
 
     //Webcam
-    const [screenWidth] = useState(window.innerWidth * 0.42) //640
-    const [screenHeight] = useState(screenWidth * 0.75) //480
-    const [iconSize] = useState(screenWidth*0.12)
-
-    //Micro
-    const [isSignalDetected, setIsSignalDetected] = useState(false)
-
-    //modal
-    const [show, setShow] = useState(false);
-
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-
+    const [isWebcamInitNotDone, setIsWebcamInitNotDone] = useState(true);
+    const [webcamWidth] = useState(window.innerWidth * 0.42) //640
+    const [webcamHeight] = useState(webcamWidth * 0.75) //480
+    const [iconSize] = useState(webcamWidth * 0.12)
 
     const video = useRef(null);
-    const canvas = useRef(null)
-    const grid = useRef(null)
+    const webcamLayer = useRef(null)
+    const gridLayer = useRef(null)
     const iconsLayer = useRef(null)
-    const highlighting = useRef(null)
-    let canvas2dContext, model, activeMenuNr = 1, startTime = 0, timePassed = 0;
+    const highlightingLayer = useRef(null)
 
+    //Micro
+    const {transcript, resetTranscript} = useSpeechRecognition();
+    const [playConfirmSound] = useSound(confirmSound);
+    const [isSignalWordDetected, setIsSignalWordDetected] = useState(false)
+    const [steps, setSteps] = useState(false)
+
+    //information Modal
+    const [showInformation, setShowInformation] = useState(false);
+
+    const handleCloseInformation = () => setShowInformation(false);
+    const handleShowInformation = () => setShowInformation(true);
+
+    let canvas2dContext, model, activeMenuNr = 1, startTime = 0, timePassed = 0;
 
 
     /****************************************************************************************************
@@ -76,53 +76,42 @@ export function WebController(props) {
 
     useEffect(() => {
         if (props.modus === "speech" || props.modus === "multimodal") {
-            startListening();
+            startVoiceControl();
         }
     }, [props.modus])
 
-    const {
-        transcript, resetTranscript
-    } = useSpeechRecognition();
 
-    function startListening() {
-        setMicOn(true);
+    function startVoiceControl() {
+        setIsMicOn(true);
         SpeechRecognition.startListening({continuous: true});
-        //TODO: change possible settings: https://github.com/JamesBrill/react-speech-recognition/tree/8ecb6052949e47a3fae8c6978abb4253ee1d00f1
     }
 
-    function stopListening() {
-        setMicOn(false);
+    function stopVoiceControl() {
+        setIsMicOn(false);
         SpeechRecognition.stopListening()
-        //TODO: change possible settings: https://github.com/JamesBrill/react-speech-recognition/tree/8ecb6052949e47a3fae8c6978abb4253ee1d00f1
     }
 
+    //runs if new voice input is detected
     useEffect(() => {
-        let stringTranscript = transcriptToLowerCase(transcript);
-        let arrayTranscript = transcriptToArray(stringTranscript);
+        //extract information from transcript (1)
+        let transcriptLowerCase = stringTranscriptToLowerCase(transcript);
+        let arrayTranscript = transcriptToWordArray(transcriptLowerCase);
         let filteredArrayTranscript = filterCommands(arrayTranscript);
-        console.log("------")
-        console.log("Without: " + arrayTranscript)
-        console.log("With filter: " + filteredArrayTranscript)
 
         if (containsSignalWord(filteredArrayTranscript)) {
-            play()
-            setIsSignalDetected(true)
+            playConfirmSound();
+            setIsSignalWordDetected(true)
             resetTranscript();
         } else {
-            if (arrayTranscript.length > 5) {
-                resetTranscript();
-                setSteps(1);
-            } else if (isSignalDetected) {
-                let possibleCommand = filteredArrayTranscript.join(' ').toString();
-                let stepsExtracted = extractFirstNumberInStringArray(arrayTranscript)
+            if(isSignalWordDetected){
+                //extract command information from transcript (2)
+                const stepsExtracted = extractFirstNumberInStringArray(arrayTranscript)
+                const possibleCommand = filteredArrayTranscript.join(' ').toString();
+                const specificCommaned = setCommandFromVoiceCommand(possibleCommand);
 
-
-                const specificCommaned = getCommandToVoiceCommand(possibleCommand);
-                if(specificCommaned !== "") {
+                //a valid command is detected
+                if (specificCommaned !== "") {
                     setSteps(parseInt(stepsExtracted));
-                    console.log("Value steps:" + parseInt(steps))
-                    console.log("Type steps:" + typeof steps)
-
                     setSelectedCommand(specificCommaned);
 
                     setTimeout(() => {
@@ -132,9 +121,16 @@ export function WebController(props) {
                     resetTranscript();
                 }
             }
+
+            // after 5 words after singal, singal word must be expressed again
+            if (arrayTranscript.length > 5) {
+                resetTranscript();
+                setSteps(1);
+            }
         }
 
     }, [transcript]);
+
 
     /****************************************************************************************************
      * WEBCAM Controller
@@ -145,36 +141,35 @@ export function WebController(props) {
         maxNumBoxes: 5,        // maximum number of boxes to detect
     }
 
+    const start = async () => {
+        setIsWebcamOn(true)
+        model = await handTrack.load(eyeTrackingSettings);
+        canvas2dContext = webcamLayer.current.getContext('2d');
+        console.log(webcamWidth)
+        removeCanvasLayer(iconsLayer, webcamWidth, webcamHeight)
+        await handTrack.startVideo(video.current);
+        drawGridOverlay(gridLayer, webcamWidth, webcamHeight);
+        drawIconsMenu1(iconsLayer, iconSize, webcamWidth, webcamHeight);
+    }
+
+    const stop = async () => {
+        setIsWebcamOn(false)
+        await handTrack.stopVideo();
+    }
+
+    const begin = async () => {
+        setIsWebcamOn(true)
+    }
+
     useEffect(() => {
-        const start = async () => {
-            setWebcamOn(true)
-            model = await handTrack.load(eyeTrackingSettings);
-            canvas2dContext = canvas.current.getContext('2d');
-            console.log(screenWidth)
-            removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
-            await handTrack.startVideo(video.current);
-            drawGridOverlay(grid, screenWidth, screenHeight);
-            drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight);
-        }
-        const stop = async () => {
-            setWebcamOn(false)
-            await handTrack.stopVideo();
-        }
-
-        const begin = async () => {
-            setWebcamOn(true)
-        }
         begin();
-
-        if (webcamOn || initWebcamOn && (props.modus === "gesture" || props.modus === "multimodal")) {
-            setInitWebcamOn(false);
+        if (isWebcamOn || isWebcamInitNotDone && (props.modus === "gesture" || props.modus === "multimodal")) {
+            setIsWebcamInitNotDone(false);
             start().then(() => detectHandsInVideo())
         } else {
             stop()
         }
-
-
-    }, [webcamOn])
+    }, [isWebcamOn])
 
     function detectHandsInVideo() {
         model.detect(video.current).then(predictions => {
@@ -183,18 +178,18 @@ export function WebController(props) {
             if (containsPredictions(filteredPredictions)) {
                 const bBox = filteredPredictions[0].bbox; //only get the first detected value
                 const centerOfBBox = calculateCenterOfBBox(bBox[0], bBox[1], bBox[2], bBox[3]) //position of pinch or closed Hand
-                const gridPosition = positionInGrid(centerOfBBox[0], centerOfBBox[1], screenWidth, screenHeight) //decided in 3x3 grid were gesture ist detected
+                const gridPosition = positionInGrid(centerOfBBox[0], centerOfBBox[1], webcamWidth, webcamHeight) //decided in 3x3 gridLayer were gesture ist detected
                 timePassed = performance.now() - startTime;
 
                 controlCommandPalet(gridPosition);
-                highlightSectionActive(gridPosition, highlighting, screenWidth, screenHeight)
+                highlightSectionActive(gridPosition, highlightingLayer, webcamWidth, webcamHeight)
             } else {
                 startTime = performance.now();
                 timePassed = 0
-                removeCanvasLayer(highlighting, screenWidth, screenHeight);
+                removeCanvasLayer(highlightingLayer, webcamWidth, webcamHeight);
             }
 
-            model.renderPredictions(predictions, canvas.current, canvas2dContext, video.current);
+            model.renderPredictions(predictions, webcamLayer.current, canvas2dContext, video.current);
             window.requestAnimationFrame(detectHandsInVideo);
         });
     }
@@ -221,8 +216,8 @@ export function WebController(props) {
                         break;
                     case "centerCenter":
                         activeMenuNr = 2
-                        removeCanvasLayer(iconsLayer, screenWidth, screenHeight);
-                        drawIconsMenu2(iconsLayer, iconSize, screenWidth, screenHeight)
+                        removeCanvasLayer(iconsLayer, webcamWidth, webcamHeight);
+                        drawIconsMenu2(iconsLayer, iconSize, webcamWidth, webcamHeight)
                         break;
                     case "centerRight":
                         selection = "goRight"
@@ -254,8 +249,8 @@ export function WebController(props) {
                         break;
                     case "centerCenter":
                         activeMenuNr = 1
-                        removeCanvasLayer(iconsLayer, screenWidth, screenHeight)
-                        drawIconsMenu1(iconsLayer, iconSize, screenWidth, screenHeight)
+                        removeCanvasLayer(iconsLayer, webcamWidth, webcamHeight)
+                        drawIconsMenu1(iconsLayer, iconSize, webcamWidth, webcamHeight)
                         break;
                     case "centerRight":
                         selection = "default"
@@ -313,101 +308,94 @@ export function WebController(props) {
     /****************************************************************************************************
      * VIEW
      *************************************************************************************************** */
-    return (
-        <Container style={{maxWidth: '100%', maxHeight: '100%'}}>
-            <Row>
-                <Header/>
-            </Row>
-            <Row>
-                <CommandBar selectedCommand={selectedCommand}/>
-            </Row>
-            <Row>
-                <Col xs={6}>
-                    <div style={{
-                        padding: "3%",
-                        border: "5px solid #1C6EA4",
-                        borderRadius: "14px",
-                        alignContent: "center"
-                    }}>
-                        <ButtonGroup className="mb-3">
-                            <Button variant="secondary"
-                                    style={micOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
-                                    onClick={() => micOn ? stopListening() : startListening()}>
-                                {micOn ? <BsMic/> : <BsMicMute/>}
-                                Micro
-                            </Button>
-                            <Button variant="secondary"
-                                    style={webcamOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
-                                    onClick={() => webcamOn ? setWebcamOn(false) : setWebcamOn(true)}>
-                                {webcamOn ? <BsCameraVideo/> : <BsCameraVideoOff/>}
-                                Webcam
-                            </Button>
-                            <Button variant="secondary" onClick={handleShow}>
-                                Information
-                            </Button>
-                        </ButtonGroup>
-                        <div>
-                            <ListGroup componentClass="ul" style={{padding: "3%"}}>
-                                <ListGroupItem>
-                                    Eingabe: {transcript}
-                                </ListGroupItem>
-                            </ListGroup>
-                        </div>
-
-                        <div>
-                            <div style={{
-                                position: "relative", width: screenWidth, height: screenHeight,
-                            }}>
-                                <video ref={video} width={screenWidth} height={screenHeight} style={{
-                                    position: "absolute",
-                                    width: screenWidth,
-                                    height: screenHeight,
-                                    top: "0",
-                                    left: "0"
-                                }}/>
-                                <canvas ref={canvas} width={screenWidth} height={screenHeight}
-                                        style={{
-                                            position: "absolute", top: "0", left: "0", zIndex: "0",
-                                        }}/>
-                                <canvas ref={grid} width={screenWidth} height={screenHeight}
-                                        style={{
-                                            position: "absolute", left: "0", top: "0", zIndex: "1",
-                                        }}/>
-                                <canvas ref={highlighting} width={screenWidth} height={screenHeight}
-                                        style={{
-                                            position: "absolute", left: "0", top: "0", zIndex: "2",
-                                        }}/>
-                                <canvas ref={iconsLayer} width={screenWidth} height={screenHeight}
-                                        style={{
-                                            position: "absolute", left: "0", top: "0", zIndex: "2",
-                                        }}/>
-                            </div>
-
-                        </div>
+    return (<Container style={{maxWidth: '100%', maxHeight: '100%'}}>
+        <Row>
+            <Header/>
+        </Row>
+        <Row>
+            <CommandBar selectedCommand={selectedCommand}/>
+        </Row>
+        <Row>
+            <Col xs={6}>
+                <div style={{
+                    padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px", alignContent: "center"
+                }}>
+                    <ButtonGroup className="mb-3">
+                        <Button variant="secondary"
+                                style={isMicOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
+                                onClick={() => isMicOn ? stopVoiceControl() : startVoiceControl()}>
+                            {isMicOn ? <BsMic/> : <BsMicMute/>}
+                            Micro
+                        </Button>
+                        <Button variant="secondary"
+                                style={isWebcamOn ? {"backgroundColor": "#2a9325"} : {"backgroundColor": "#e34c30"}}
+                                onClick={() => isWebcamOn ? setIsWebcamOn(false) : setIsWebcamOn(true)}>
+                            {isWebcamOn ? <BsCameraVideo/> : <BsCameraVideoOff/>}
+                            Webcam
+                        </Button>
+                        <Button variant="secondary" onClick={handleShowInformation}>
+                            Information
+                        </Button>
+                    </ButtonGroup>
+                    <div>
+                        <ListGroup componentClass="ul" style={{padding: "3%"}}>
+                            <ListGroupItem>
+                                Eingabe: {transcript}
+                            </ListGroupItem>
+                        </ListGroup>
                     </div>
-                </Col>
-                <Col xs={6} style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
-                    <DicomViewer selectedCommand={selectedCommand} steps={steps}/>
-                </Col>
-                <>
-                    <Modal show={show} onHide={handleClose} size={"xl"} aria-labelledby="contained-modal-title-vcenter"
-                           media="print" centered>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Beschreibung der Funktionalitäten</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <InformationController/>
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={handleClose}>
-                                Close
-                            </Button>
-                        </Modal.Footer>
-                    </Modal>
-                </>
 
-            </Row>
+                    <div>
+                        <div style={{
+                            position: "relative", width: webcamWidth, height: webcamHeight,
+                        }}>
+                            <video ref={video} width={webcamWidth} height={webcamHeight} style={{
+                                position: "absolute", width: webcamWidth, height: webcamHeight, top: "0", left: "0"
+                            }}/>
+                            <canvas ref={webcamLayer} width={webcamWidth} height={webcamHeight}
+                                    style={{
+                                        position: "absolute", top: "0", left: "0", zIndex: "0",
+                                    }}/>
+                            <canvas ref={gridLayer} width={webcamWidth} height={webcamHeight}
+                                    style={{
+                                        position: "absolute", left: "0", top: "0", zIndex: "1",
+                                    }}/>
+                            <canvas ref={highlightingLayer} width={webcamWidth} height={webcamHeight}
+                                    style={{
+                                        position: "absolute", left: "0", top: "0", zIndex: "2",
+                                    }}/>
+                            <canvas ref={iconsLayer} width={webcamWidth} height={webcamHeight}
+                                    style={{
+                                        position: "absolute", left: "0", top: "0", zIndex: "2",
+                                    }}/>
+                        </div>
+
+                    </div>
+                </div>
+            </Col>
+            <Col xs={6} style={{padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px"}}>
+                <DicomViewer selectedCommand={selectedCommand} steps={steps}/>
+            </Col>
+            <>
+                <Modal show={showInformation} onHide={handleCloseInformation} size={"xl"}
+                       aria-labelledby="contained-modal-title-vcenter"
+                       media="print" centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Beschreibung der Funktionalitäten</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <InformationController/>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseInformation}>
+                            Close
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            </>
+
+        </Row>
 
 
-        </Container>);
+    </Container>);
 }
