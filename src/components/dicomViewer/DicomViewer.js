@@ -30,120 +30,113 @@ cornerstoneWADOImageLoader.webWorkerManager.initialize(configurations.config);
 cornerstoneFileImageLoader.external.cornerstone = cornerstone;
 cornerstoneTools.init();
 
+
+//load sample-image & update viewport
+
+
 function DicomViewer(props) {
     let dicomElement, canvas;
     const [isCornerstoneLoaded, setIsCornerstoneLoaded] = useState(false)
+    const [defaultLevelValues, setDefaultLevelValues] = useState({})
 
-
-    const [defaultLevelValues, setDefaultLevelValues] = useState({
-        xPosition: -1,
-        yPosition: -1,
-        zoomLevel: -1,
-        brightnessLevel: -1,
-        saturationLevel: -1,
-        degreeTurn: -1,
-        isInverted: -1
-    })
-
-    const [brigthnessLevel, setBrigthnessLevel] = useState(1)
-    const [xPosition, setXPosition] = useState(1)
-    const [yPosition, setYPosition] = useState(1)
+    //Setting values for image manipulation
+    const [brigthnessFactor, setBrigthnessFactor] = useState(1)
+    const [xPositionTranslation, setXPositionTranslation] = useState(1)
+    const [yPositionTranslation, setYPositionTranslation] = useState(1)
     const [saturationLevel, setSaturationLevel] = useState(1)
-    const [zoomLevel, setZoomLevel] = useState(1)
-    const [degreeTurn, setDegreeTurn] = useState(0);
+    const [scaleFactor, setScaleFactor] = useState(1)
+    const [degreeRotation, setDegreeRotation] = useState(0);
     const [isInverted, setIsInverted] = useState(true)
+
+    //Image setting
     const [dicomWidth] = useState(window.innerWidth * 0.42)
-
     const [dicomHeight] = useState(dicomWidth * 0.75)
-
     const [defaultImage, setDefaultImage] = useState(configurations.DICOM_brain)
 
-    configurations.dicomSettings.width = dicomWidth
-    configurations.dicomSettings.height = dicomHeight
 
+    /****************************************************************************************************
+     * Initialize & handle selected commands
+     *************************************************************************************************** */
     useEffect(() => {
         dicomElement = document.getElementById('dicomImage'); //the view of the the file
         canvas = document.getElementsByClassName("cornerstone-canvas")[0] //the canvas element - to apply effects
 
+        //if isCornerstoneLoaded not loaded, start default setting
         if (!isCornerstoneLoaded) {
-            //initialize cornerstone
-            cornerstone.enable(dicomElement);
-            loadDicomMouseTools(); //initialize tools for simple mouse navigation
-
-            //load sample-image & update viewport
-            async function startProcess() {
-                let image = await cornerstone.loadImage(configurations.DICOM_spine_section);
-                await cornerstone.displayImage(dicomElement, image);
-                initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
-            }
-
-            startProcess()
-            //finish loading process
-            setIsCornerstoneLoaded(true);
+            startDicomViewer(dicomElement);
         } else {
-            switch (props.selectedCommand) {
-                case "zoomIn":
-                    zoomIn(props.steps);
-                    break;
-                case "zoomOut":
-                    zoomOut(props.steps);
-                    break;
-                case "goUp":
-                    goUp(props.steps);
-                    break;
-                case "goDown":
-                    goDown(props.steps);
-                    break;
-                case "goLeft":
-                    goLeft(props.steps);
-                    break;
-                case "goRight":
-                    goRight(props.steps);
-                    break;
-                case "brightnessDown":
-                    brigthnessDown(props.steps);
-                    break;
-                case "brightnessUp":
-                    brightnessUp(props.steps);
-                    break
-                case "saturationUp":
-                    saturationUp(props.steps)
-                    break;
-                case "saturationDown":
-                    saturationDown(props.steps)
-                    break;
-                case  "turnLeft":
-                    turnLeft()
-                    break;
-                case "turnRight":
-                    turnRight();
-                    break;
-                case "invert":
-                    setIsInverted(!isInverted)
-                    invertColors()
-                    break;
-                case "default":
-                    setDefaultValues();
-                    break;
-                default:
-                    cornerstone.updateImage(dicomElement); // for canvas
-                    break;
-            }
+            processCommand(dicomElement, props.selectedCommand, props.steps)
         }
-
-        const func = () => {
-            console.log("ok")
-            cornerstone.resize(dicomElement);
-        }
-        window.addEventListener("resize", func)
-        return () => {
-            window.removeEventListener("resize", func)
-        }
-
     }, [props.selectedCommand])
 
+
+    async function startDicomViewer(dicomElement) {
+        await cornerstone.enable(dicomElement);
+        loadDicomMouseTools(); //initialize tools for simple mouse navigation
+        await loadingDefaultMedicalImage(dicomElement) //load the default Image
+        setIsCornerstoneLoaded(true); //finish loading process
+    }
+
+    async function loadingDefaultMedicalImage(dicomElement) {
+        let image = await cornerstone.loadImage(configurations.DICOM_spine_section);
+        await cornerstone.displayImage(dicomElement, image);
+        initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
+    }
+
+    async function processCommand(dicomElement, command, steps) {
+        switch (command) {
+            case "zoomIn":
+                zoomIn(steps);
+                break;
+            case "zoomOut":
+                zoomOut(steps);
+                break;
+            case "goUp":
+                goUp(steps);
+                break;
+            case "goDown":
+                goDown(steps);
+                break;
+            case "goLeft":
+                goLeft(steps);
+                break;
+            case "goRight":
+                goRight(steps);
+                break;
+            case "brightnessDown":
+                brigthnessDown(steps);
+                break;
+            case "brightnessUp":
+                brightnessUp(steps);
+                break
+            case "saturationUp":
+                saturationUp(steps)
+                break;
+            case "saturationDown":
+                saturationDown(steps)
+                break;
+            case  "turnLeft":
+                turnLeft()
+                break;
+            case "turnRight":
+                turnRight();
+                break;
+            case "invert":
+                setIsInverted(!isInverted)
+                invertColors()
+                break;
+            case "default":
+                loadDefaultValus();
+                break;
+            default:
+                cornerstone.updateImage(dicomElement); // for canvas
+                break;
+        }
+    }
+
+
     /****************************************************************************************************
-     * Controlling the viewport with MOUSE
+     * Loading mouse control
      *************************************************************************************************** */
 
     function loadDicomMouseTools() {
@@ -168,9 +161,29 @@ function DicomViewer(props) {
         cornerstoneTools.setToolActive('Rotate', {mouseButtonMask: 8})
     }
 
+    function updateValuesOnMouseControl() {
+        dicomElement = document.getElementById('dicomImage'); //the view of the the file
+        let viewport = cornerstone.getViewport(dicomElement);
+
+        setXPositionTranslation(viewport.translation.x)
+        setYPositionTranslation(viewport.translation.y)
+        setScaleFactor(viewport.scale)
+        setBrigthnessFactor(viewport.voi.windowCenter)
+        setDegreeRotation(viewport.rotation)
+        setIsInverted(viewport.invert)
+
+    }
+
     /****************************************************************************************************
-     * Controlling the viewport with KEYS
+     * Functions to manipulate images
      *************************************************************************************************** */
+
+    // change the depth or intensity of colour
+    function changeSaturation() {
+        let context = canvas.getContext('2d')
+        context.filter = "saturate(" + saturationLevel + ")";
+    }
+
     function saturationUp(steps) {
         setSaturationLevel(saturationLevel - 0.1 * steps)
         changeSaturation();
@@ -181,54 +194,32 @@ function DicomViewer(props) {
         changeSaturation();
     }
 
-    /**
-     * Change saturation of canvas
-     */
-    function changeSaturation() {
-        let context = canvas.getContext('2d')
-        context.filter = "saturate(" + saturationLevel + ")";
-    }
-
-    /**
-     * Change brightness of canvas
-     */
-    function brightnessUp(steps) {
-        changeBrigthness( -10 * steps)
-    }
-
-    function brigthnessDown(steps) {
-        changeBrigthness( 10 * steps)
-    }
-
+    // change brightness of an image
     function changeBrigthness(brightnessSteps) {
         let currentViewport = cornerstone.getViewport(dicomElement);
-        currentViewport.voi.windowCenter += brightnessSteps;
-        setBrigthnessLevel(currentViewport.voi.windowCenter);
-        cornerstone.setViewport(dicomElement, currentViewport);
+        setBrightness(currentViewport.voi.windowCenter + brightnessSteps)
     }
 
     function setBrightness(brightness) {
         let currentViewport = cornerstone.getViewport(dicomElement);
         currentViewport.voi.windowCenter = brightness;
-        setBrigthnessLevel(currentViewport.voi.windowCenter);
+        setBrigthnessFactor(currentViewport.voi.windowCenter);
         cornerstone.setViewport(dicomElement, currentViewport);
     }
 
-
-    function zoomIn(steps) {
-        zoomPerLevel(0.1*steps)
+    function brightnessUp(steps) {
+        changeBrigthness(-10 * steps)
     }
 
-    function zoomOut(steps) {
-        zoomPerLevel(-0.1*steps)
+    function brigthnessDown(steps) {
+        changeBrigthness(10 * steps)
     }
 
+
+    //scale in or out in an image
     function zoomPerLevel(scaleSteps) {
         let currentViewport = cornerstone.getViewport(dicomElement);
-        currentViewport.scale += scaleSteps;
-        cornerstone.setViewport(dicomElement, currentViewport);
-        cornerstone.updateImage(dicomElement);
-        setZoomLevel(currentViewport.scale)
+        zoom(currentViewport.scale + scaleSteps)
     }
 
     function zoom(scaleFactor) {
@@ -236,9 +227,44 @@ function DicomViewer(props) {
         currentViewport.scale = scaleFactor;
         cornerstone.setViewport(dicomElement, currentViewport);
         cornerstone.updateImage(dicomElement);
-        setZoomLevel(scaleFactor)
+        setScaleFactor(scaleFactor)
     }
 
+    function zoomIn(steps) {
+        zoomPerLevel(0.1 * steps)
+    }
+
+    function zoomOut(steps) {
+        zoomPerLevel(-0.1 * steps)
+    }
+
+    //translate image in x and y direction
+    function navigation(direction, steps) {
+        let currentViewport = cornerstone.getViewport(dicomElement);
+        let delta = 10 * steps;
+        console.log("Delta: " + delta);
+        switch (direction) {
+            case "goLeft":
+                currentViewport.translation.x += delta;
+                break;
+            case "goRight":
+                currentViewport.translation.x -= delta;
+                break;
+            case "goUp":
+                currentViewport.translation.y -= delta;
+                break;
+            case "goDown":
+                currentViewport.translation.y += delta;
+                break;
+            default:
+                break;
+        }
+
+        setXPositionTranslation(currentViewport.translation.x)
+        setYPositionTranslation(currentViewport.translation.y)
+        cornerstone.setViewport(dicomElement, currentViewport);
+        cornerstone.updateImage(dicomElement);
+    }
 
     function goLeft(steps) {
         navigation("goLeft", steps)
@@ -256,43 +282,9 @@ function DicomViewer(props) {
         navigation("goDown", steps)
     }
 
-    function navigation(direction, steps) {
-        let currentViewport = cornerstone.getViewport(dicomElement);
-        let delta = 10 * steps;
-        console.log("Delta: " + delta);
-        switch (direction) {
-            case "goLeft":
-                currentViewport.translation.x -= delta;
-                break;
-            case "goRight":
-                currentViewport.translation.x += delta;
-                break;
-            case "goUp":
-                currentViewport.translation.y += delta;
-                break;
-            case "goDown":
-                currentViewport.translation.y -= delta;
-                break;
-            default:
-                break;
-        }
-
-        setXPosition(currentViewport.translation.x)
-        setYPosition(currentViewport.translation.y)
-        cornerstone.setViewport(dicomElement, currentViewport);
-        cornerstone.updateImage(dicomElement);
-    }
-
-    /****************************************************************************************************
-     * Turn image
-     *************************************************************************************************** */
-
-    /**
-     * Turn the direction left (negative value in degrees), right (positiv value in degress)
-     * @param degree
-     */
+    //turn direction left (negative value in degrees), right (positiv value in degress)
     function turn(degree) {
-        setDegreeTurn(degree)
+        setDegreeRotation(degree)
         let currentViewport = cornerstone.getViewport(dicomElement);
         currentViewport.rotation = degree;
         cornerstone.setViewport(dicomElement, currentViewport);
@@ -300,33 +292,40 @@ function DicomViewer(props) {
     }
 
     function turnLeft() {
-        turn(degreeTurn - 36*props.steps)
+        turn(degreeRotation - 36 * props.steps)
     }
 
     function turnRight() {
-        turn(degreeTurn + 36*props.steps)
+        turn(degreeRotation + 36 * props.steps)
+    }
+
+    //invert the colors of an image
+    function invertColors() {
+        let currentViewport = cornerstone.getViewport(dicomElement);
+        currentViewport.invert = isInverted;
+        cornerstone.setViewport(dicomElement, currentViewport);
+        cornerstone.updateImage(dicomElement);
     }
 
     /****************************************************************************************************
      * Default functions to control viewport
      *************************************************************************************************** */
     /**
-     * Setting everything to default.
+     * Setting everything in the image to default values (first load)
      */
-    function setDefaultValues() {
-
+    function loadDefaultValus() {
         setIsInverted(defaultLevelValues.isInverted);
 
-        setDegreeTurn(defaultLevelValues.degreeTurn)
+        setDegreeRotation(defaultLevelValues.degreeTurn)
         turn(defaultLevelValues.degreeTurn)
 
         setBrightness(defaultLevelValues.brightnessLevel);
-        setBrigthnessLevel(defaultLevelValues.brightnessLevel)
+        setBrigthnessFactor(defaultLevelValues.brightnessLevel)
 
         changeSaturation(defaultLevelValues.saturationLevel);
         setSaturationLevel(defaultLevelValues.saturationLevel);
 
-        setZoomLevel(defaultLevelValues.zoomLevel);
+        setScaleFactor(defaultLevelValues.zoomLevel);
         zoom(defaultLevelValues.zoomLevel);
 
         if (!isInverted) {
@@ -335,8 +334,8 @@ function DicomViewer(props) {
 
         let currentViewport = cornerstone.getViewport(dicomElement);
 
-        setXPosition(defaultLevelValues.xposition)
-        setYPosition(defaultLevelValues.yPosition)
+        setXPositionTranslation(defaultLevelValues.xPosition)
+        setYPositionTranslation(defaultLevelValues.yPosition)
 
         currentViewport.translation.x = 0
         currentViewport.translation.y = 0
@@ -350,36 +349,31 @@ function DicomViewer(props) {
      * Setting a viewport
      * @param viewport
      */
+
+
     function initializeViewport(viewport) {
         dicomElement = document.getElementById('dicomImage'); //the view of the the file
         cornerstone.setViewport(dicomElement, viewport);
         cornerstone.updateImage(dicomElement);
+
         setDefaultLevelValues({
-                xposition: viewport.translation.x,
-                yPosition: viewport.translation.y,
-                zoomLevel: viewport.scale,
-                brightnessLevel: viewport.voi.windowCenter,
-                saturationLevel: 1,
-                degreeTurn: viewport.rotation ,
-                isInverted: viewport.invert
-            }
-        )
-        setXPosition(defaultLevelValues.xPosition)
-        setYPosition(defaultLevelValues.yPosition)
-        setZoomLevel(defaultLevelValues.scale)
-        setBrigthnessLevel(defaultLevelValues.brightnessLevel)
-        setSaturationLevel(defaultLevelValues.saturationLevel)
-        setDegreeTurn(defaultLevelValues.degreeTurn)
-        setIsInverted(defaultLevelValues.isInverted)
+            xPosition: viewport.translation.x,
+            yPosition: viewport.translation.y,
+            zoomLevel: viewport.scale,
+            brightnessLevel: viewport.voi.windowCenter,
+            saturationLevel: 1,
+            degreeTurn: viewport.rotation,
+            isInverted: viewport.invert
+        })
+        setXPositionTranslation(viewport.translation.x)
+        setYPositionTranslation(viewport.translation.y)
+        setScaleFactor(viewport.scale)
+        setBrigthnessFactor(viewport.voi.windowCenter)
+        setSaturationLevel(1)
+        setDegreeRotation(viewport.rotation)
+        setIsInverted(viewport.invert)
 
-        setBrigthnessLevel(viewport.voi.windowCenter)
-    }
-
-    function invertColors() {
-        let currentViewport = cornerstone.getViewport(dicomElement);
-        currentViewport.invert = isInverted;
-        cornerstone.setViewport(dicomElement, currentViewport);
-        cornerstone.updateImage(dicomElement);
+        setBrigthnessFactor(viewport.voi.windowCenter)
     }
 
     /****************************************************************************************************
@@ -409,7 +403,7 @@ function DicomViewer(props) {
     /**
      * Loading one of the defaut images
      */
-    useEffect( () => {
+    useEffect(() => {
         dicomElement = document.getElementById('dicomImage'); //the view of the the file
 
         async function loadDefaultImage() {
@@ -418,19 +412,19 @@ function DicomViewer(props) {
             initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
         }
 
+        console.log("Something happened")
         loadDefaultImage();
 
     }, [defaultImage])
 
-    return (
-        <Fragment>
+    return (<Fragment>
             <h3>Dicom Viewer</h3>
-            <div >
+            <div>
                 <Form style={{textAlign: "left"}}>
                     <Form.Label>Lade eine JPG, PNG oder ein DICOM-File hoch</Form.Label>
                     <Row>
                         <Col sm={8}>
-                            <Form.Control type="file" onChange={setNewImage} />
+                            <Form.Control type="file" onChange={setNewImage}/>
                         </Col>
                         <Col sm={4}>
                             <Form.Select
@@ -448,24 +442,24 @@ function DicomViewer(props) {
                     </Row>
                 </Form>
                 <div id="dicomImage"
+                     onClick={updateValuesOnMouseControl}
+                     onWheelCapture={updateValuesOnMouseControl}
                      style={{
-                         width: configurations.dicomSettings.width,
-                         height: configurations.dicomSettings.height,
-                         margin: "10px auto",
-                         background: Colors.brightBlue
+                         width: dicomWidth, height: dicomHeight, margin: "10px auto", background: Colors.brightBlue
                      }}/>
                 <div style={{textAlign: "left"}}>
                     <ListGroup>
-                        <ListGroupItem>Brightness: {Math.round(brigthnessLevel)/100} Level</ListGroupItem>
-                        <ListGroupItem>Translation: (x: {xPosition}px,y: {yPosition}px) </ListGroupItem>
-                        <ListGroupItem>Zoom: {Math.round(zoomLevel*100)/100}</ListGroupItem>
-                        <ListGroupItem>Degree: {Math.round(degreeTurn) % 360}&deg;</ListGroupItem>
+                        <ListGroupItem>Brightness: {Math.round(brigthnessFactor) / 100} [default: {Math.round(defaultLevelValues.brightnessLevel) / 100}]</ListGroupItem>
+                        <ListGroupItem>Translation: (x: {Math.round(xPositionTranslation)}px,
+                            y: {(-1) * Math.round(yPositionTranslation)}px) [default:
+                            ({defaultLevelValues.xPosition},{defaultLevelValues.yPosition})]</ListGroupItem>
+                        <ListGroupItem>Zoom: {Math.round(scaleFactor * 100) / 100} [default: {Math.round(defaultLevelValues.zoomLevel * 100) / 100} ]</ListGroupItem>
+                        <ListGroupItem>Degree: {Math.round(degreeRotation) % 360}&deg; [default: {Math.round(defaultLevelValues.degreeTurn) / 100}&deg;]</ListGroupItem>
                         <ListGroupItem>Inverted: {isInverted === false ? "off" : "on"}</ListGroupItem>
                     </ListGroup>
                 </div>
             </div>
-        </Fragment>
-    );
+        </Fragment>);
 }
 
 export default DicomViewer;
