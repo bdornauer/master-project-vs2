@@ -32,12 +32,13 @@ const DICOM_spine_section = 'wadouri:https://master-project-vs2.herokuapp.com/DI
 const JPG_Renal_Cell_Carcinoma = 'https://master-project-vs2.herokuapp.com/sampleMedicalImages/JPG_Renal_Cell_Carcinoma.jpeg';
 const PNG_brain = 'http://localhost:3000/sampleMedicalImages/PNG_brain.png';
 */
+const projectUrl = "https://master-project-vs2.herokuapp.com/sampleMedicalImages";
 
-const DICOM_brain = 'wadouri:./sampleMedicalImages/DICOM_brain.DCM';
+const DICOM_brain = `wadouri:}${projectUrl/DICOM_brain.DCM`;
 const DICOM_spine = 'wadouri:./sampleMedicalImages/DICOM_spine.DCM';
 const DICOM_spine_section = 'wadouri:./sampleMedicalImages/DICOM_spine_section.DCM';
-const JPG_Renal_Cell_Carcinoma = './sampleMedicalImages/JPG_Renal_Cell_Carcinoma.jpeg';
-const PNG_brain = './sampleMedicalImages/PNG_brain.png';
+const JPG_Renal_Cell_Carcinoma = `${projectUrl}/JPG_Renal_Cell_Carcinoma.jpeg`;
+const PNG_brain = `${projectUrl}/PNG_brain.png`;
 
 export default {
     config,

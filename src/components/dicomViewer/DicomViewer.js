@@ -11,6 +11,7 @@ import {Fragment, useEffect, useState} from "react";
 import {Col, Form, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 import configurations from "./DicomViewerDefaultConfiguration"
 import Colors from "../Colors"
+import {load} from "handtrackjs";
 
 /**
  * Loading the tools for the dicom-Viewer containing:
@@ -377,8 +378,19 @@ function DicomViewer(props) {
     }
 
     /****************************************************************************************************
-     * Upload an image
+     * Setting a new image
      *************************************************************************************************** */
+
+    /**
+     * Loading one of the defaut images
+     */
+    async function loadNewImage(dicomElement, defaultImageId) {
+        let image = await cornerstone.loadImage(defaultImageId);
+        let viewport = cornerstone.getDefaultViewportForImage(dicomElement, image)
+        await cornerstone.displayImage(dicomElement, image);
+        initializeViewport(viewport)
+    }
+
     function setNewImage(e) {
         let dicomElement = document.getElementById('dicomImage');
         const file = e.target.files[0];
@@ -392,29 +404,12 @@ function DicomViewer(props) {
             imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
         }
 
-        cornerstone.loadImage(imageId).then(function (image) {
-            const viewport = cornerstone.getDefaultViewportForImage(dicomElement, image);
-            cornerstone.displayImage(dicomElement, image, viewport);
-            initializeViewport(viewport)
-        });
-
+        loadNewImage(dicomElement,imageId)
     }
 
-    /**
-     * Loading one of the defaut images
-     */
-    useEffect(() => {
+    useEffect( () => {
         dicomElement = document.getElementById('dicomImage'); //the view of the the file
-
-        async function loadDefaultImage() {
-            let image = await cornerstone.loadImage(defaultImage);
-            await cornerstone.displayImage(dicomElement, image);
-            initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
-        }
-
-        console.log("Something happened")
-        loadDefaultImage();
-
+        loadNewImage(dicomElement, defaultImage);
     }, [defaultImage])
 
     return (<Fragment>
