@@ -35,9 +35,10 @@ const PNG_brain = 'http://localhost:3000/sampleMedicalImages/PNG_brain.png';
 //https://master-project-vs2.herokuapp.com
 const projectUrl = "https://master-project-vs2.herokuapp.com/sampleMedicalImages";
 
-const DICOM_brain = `wadouri:${projectUrl}/DICOM_brain`;
-const DICOM_spine = `wadouri:${projectUrl}/DICOM_spine.DCM`;
-const DICOM_spine_section = `wadouri:${projectUrl}/DICOM_spine_section.DCM`;
+//dcm must be small!!!!!
+const DICOM_brain = `wadouri:${projectUrl}/DICOM_brain.dcm`;
+const DICOM_spine = `wadouri:${projectUrl}/DICOM_spine.dcm`;
+const DICOM_spine_section = `wadouri:${projectUrl}/DICOM_spine_section.dcm`;
 const JPG_Renal_Cell_Carcinoma = `${projectUrl}/JPG_Renal_Cell_Carcinoma.jpeg`;
 const PNG_brain = `${projectUrl}/PNG_brain.png`;
 
