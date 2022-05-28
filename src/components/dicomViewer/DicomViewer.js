@@ -34,7 +34,6 @@ cornerstoneTools.init();
 
 //load sample-image & update viewport
 
-
 function DicomViewer(props) {
     let dicomElement, canvas;
     const [isCornerstoneLoaded, setIsCornerstoneLoaded] = useState(false)
@@ -50,7 +49,7 @@ function DicomViewer(props) {
     const [isInverted, setIsInverted] = useState(true)
 
     //Image setting
-    const [dicomWidth] = useState(window.innerWidth * 0.42)
+    const [dicomWidth] = useState(window.innerWidth * 0.35)
     const [dicomHeight] = useState(dicomWidth * 0.75)
     const [defaultImage, setDefaultImage] = useState(configurations.DICOM_brain)
 
@@ -79,7 +78,7 @@ function DicomViewer(props) {
     }
 
     async function loadingDefaultMedicalImage(dicomElement) {
-        let image = await cornerstone.loadImage(configurations.DICOM_spine_section);
+        let image = await cornerstone.loadImage(configurations.DICOM_brain);
         await cornerstone.displayImage(dicomElement, image);
         initializeViewport(cornerstone.getDefaultViewportForImage(dicomElement, image))
     }
@@ -186,12 +185,12 @@ function DicomViewer(props) {
     }
 
     function saturationUp(steps) {
-        setSaturationLevel(saturationLevel - 0.1 * steps)
+        setSaturationLevel(saturationLevel + 0.1 * steps)
         changeSaturation();
     }
 
     function saturationDown(steps) {
-        setSaturationLevel(saturationLevel + 0.1 * steps)
+        setSaturationLevel(saturationLevel - 0.1 * steps)
         changeSaturation();
     }
 
@@ -246,10 +245,10 @@ function DicomViewer(props) {
         console.log("Delta: " + delta);
         switch (direction) {
             case "goLeft":
-                currentViewport.translation.x += delta;
+                currentViewport.translation.x -= delta;
                 break;
             case "goRight":
-                currentViewport.translation.x -= delta;
+                currentViewport.translation.x += delta;
                 break;
             case "goUp":
                 currentViewport.translation.y -= delta;
@@ -413,7 +412,6 @@ function DicomViewer(props) {
     }, [defaultImage])
 
     return (<Fragment>
-            <h3>Dicom Viewer</h3>
             <div>
                 <Form style={{textAlign: "left"}}>
                     <Form.Label>Lade eine JPG, PNG oder ein DICOM-File hoch</Form.Label>
@@ -451,6 +449,7 @@ function DicomViewer(props) {
                         <ListGroupItem>Zoom: {Math.round(scaleFactor * 100) / 100} [default: {Math.round(defaultLevelValues.zoomLevel * 100) / 100} ]</ListGroupItem>
                         <ListGroupItem>Degree: {Math.round(degreeRotation) % 360}&deg; [default: {Math.round(defaultLevelValues.degreeTurn) / 100}&deg;]</ListGroupItem>
                         <ListGroupItem>Inverted: {isInverted === false ? "off" : "on"}</ListGroupItem>
+                        <ListGroupItem>Saturation: {Math.round(saturationLevel*100) / 100} (default: {defaultLevelValues.saturationLevel})</ListGroupItem>
                     </ListGroup>
                 </div>
             </div>

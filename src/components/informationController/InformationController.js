@@ -34,61 +34,61 @@ export function InformationController() {
                         <td>hinein zoomen</td>
                         <td><span role="img">🇮️️️</span></td>
                         <td><img src={zoomOut} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...zoom in "</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] in"</span></th>
                     </tr>
                     <tr>
                         <td>heraus zoomen</td>
                         <td><span role="img">️️🇴</span></td>
                         <td><img src={zoomOut} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...zoom out"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] out"</span></th>
                     </tr>
                     <tr>
                         <td>gehe nach oben</td>
                         <td><span role="img">↑️</span></td>
                         <td><img src={arrowUp} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...top [levels]"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] top "</span></th>
                     </tr>
                     <tr>
                         <td>gehe nach links</td>
                         <td><span role="img">←</span></td>
                         <td><img src={arrowLeft} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...left [levels]"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] left "</span></th>
                     </tr>
                     <tr>
                         <td>gehe nach rechts</td>
                         <td><span role="img">→</span></td>
                         <td><img src={arrowRight} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...right [levels]"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] right "</span></th>
                     </tr>
                     <tr>
                         <td>gehe nach unten</td>
                         <td><span role="img">↓️️</span></td>
                         <td><img src={arrowDown} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...down [levels]"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] down"</span></th>
                     </tr>
                     <tr>
                         <td>Helligkeit erhöhen</td>
                         <td><span role="img">🇼</span></td>
                         <td><img src={contrastPlus} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...brightness increase [levels]"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] light increase "</span></th>
                     </tr>
                     <tr>
                         <td>Helligkeit verringern</td>
                         <td><span role="img">🇸️</span></td>
                         <td><img src={contrastMinus} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...brightness decrease [levels]"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] light decrease"</span></th>
                     </tr>
                     <tr>
                         <td>Sättigung verringern</td>
                         <td><span role="img">🇳️️</span></td>
                         <td><img src={saturationMinus} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...saturation decrease [levels]"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] density decrease "</span></th>
                     </tr>
                     <tr>
                         <td>Sättigung erhöhen</td>
                         <td><span role="img">🇲</span></td>
                         <td><img src={saturationPlus} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...saturation increase [levels]"</span></th>
+                        <th><span style={{color: colors.blue}}>...[levels] density increase"</span></th>
                     </tr>
                     <tr>
                         <td>Farben invertieren</td>
@@ -101,19 +101,19 @@ export function InformationController() {
                         <td>Alles rückgängig</td>
                         <td><span role="img">🇨</span></td>
                         <td><img src={cancel} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...cancel"</span></th>
+                        <th><span style={{color: colors.blue}}>...default"</span></th>
                     </tr>
                     <tr>
                         <td>Links drehen</td>
                         <td><span role="img">🇦</span></td>
                         <td><img src={turnLeft} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>..turn counterclockwise [levels]</span>(1 level = 36 Grad)</th>
+                        <th><span style={{color: colors.blue}}>... [levels]turn counterclockwise</span>(1 level = 36 Grad)</th>
                     </tr>
                     <tr>
                         <td>Rechts drehen</td>
                         <td><span role="img">🇩️</span></td>
                         <td><img src={turnRight} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...turn clockwise [levels]"</span>(1 level = 36 Grad)</th>
+                        <th><span style={{color: colors.blue}}>... [levels] turn clockwise"</span>(1 level = 36 Grad)</th>
                     </tr>
                     </tbody>
                 </Table>

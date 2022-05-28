@@ -323,7 +323,7 @@ export function WebController(props) {
         <Row>
             <Col xs={6}>
                 <div style={{
-                    padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px", alignContent: "center"
+                    padding: "3%", border: "5px solid #1C6EA4", borderRadius: "14px", alignContent: "center",
                 }}>
                     <ButtonGroup className="mb-3">
                         <Button variant="secondary"
@@ -362,12 +362,12 @@ export function WebController(props) {
                         </ListGroup>
                     </div>
 
-                    <div>
+                    <div style={{position: "relative"}}>
                         <div style={{
-                            position: "relative", width: webcamWidth, height: webcamHeight,
+                            position: "relative", width: webcamWidth, height: webcamHeight, left: "50%", transform: "translateX(-50%)"
                         }}>
                             <video ref={video} width={webcamWidth} height={webcamHeight} style={{
-                                position: "absolute", width: webcamWidth, height: webcamHeight, top: "0", left: "0"
+                                position: "relative", width: webcamWidth, height: webcamHeight, top: "0", left: "0"
                             }}/>
                             <canvas ref={webcamLayer} width={webcamWidth} height={webcamHeight}
                                     style={{

@@ -111,7 +111,7 @@ function CommandBar(props) {
 
         setTimeout(function(){
             setActiveStatus(prevState=> ({...prevState, [name]: false}));
-        }, 300);
+        }, 500);
     }
 
 
@@ -121,9 +121,9 @@ function CommandBar(props) {
 
     function menuBarTotal() {
         return (<>
-                <Icon icon={zoomIn} isActive={activeStatus.zoomInActive} width={iconSetting.width}
-                      height={iconSetting.height}/>
                 <Icon icon={zoomOut} isActive={activeStatus.zoomOutActive} width={iconSetting.width}
+                      height={iconSetting.height}/>
+                <Icon icon={zoomIn} isActive={activeStatus.zoomInActive} width={iconSetting.width}
                       height={iconSetting.height}/>
                 <Icon icon={arrowLeft} isActive={activeStatus.goLeftActive} width={iconSetting.width}
                       height={iconSetting.height}/>

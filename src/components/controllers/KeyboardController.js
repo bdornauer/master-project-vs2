@@ -22,9 +22,9 @@ export function keySelectionCommand(pressedKey) {
         case 'd':
             return ("turnRight");
         case 'w':
-            return ("brightnessDown");
-        case 's':
             return ("brightnessUp");
+        case 's':
+            return ("brightnessDown");
         case 'n':
             return ("saturationDown");
         case 'm':
