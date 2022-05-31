@@ -292,11 +292,11 @@ function DicomViewer(props) {
     }
 
     function turnLeft() {
-        turn(degreeRotation - 36 * props.steps)
+        turn(degreeRotation - 30 * props.steps)
     }
 
     function turnRight() {
-        turn(degreeRotation + 36 * props.steps)
+        turn(degreeRotation + 30 * props.steps)
     }
 
     //invert the colors of an image

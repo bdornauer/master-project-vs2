@@ -107,13 +107,13 @@ export function InformationController() {
                         <td>Links drehen</td>
                         <td><span role="img">🇦</span></td>
                         <td><img src={turnLeft} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>... [levels]turn counterclockwise</span>(1 level = 36 Grad)</th>
+                        <th><span style={{color: colors.blue}}>... [levels]turn counterclockwise</span>(1 level = 30 Grad)</th>
                     </tr>
                     <tr>
                         <td>Rechts drehen</td>
                         <td><span role="img">🇩️</span></td>
                         <td><img src={turnRight} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>... [levels] turn clockwise"</span>(1 level = 36 Grad)</th>
+                        <th><span style={{color: colors.blue}}>... [levels] turn clockwise"</span>(1 level = 30 Grad)</th>
                     </tr>
                     </tbody>
                 </Table>
