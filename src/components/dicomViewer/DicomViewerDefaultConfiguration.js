@@ -1,5 +1,3 @@
-import Colors from '../Colors'
-
 const config = {
     maxWebWorkers: navigator.hardwareConcurrency || 1,
     startWebWorkersOnDemand: true,
@@ -11,8 +9,8 @@ const config = {
     }
 };
 
-//https://master-project-vs2.herokuapp.com
-const projectUrl = "https://master-project-vs2.herokuapp.com/sampleMedicalImages";
+const projectUrl = "http://localhost:3000/sampleMedicalImages"
+//const projectUrl = "https://master-project-vs2.herokuapp.com/sampleMedicalImages";
 //dcm must be small!!!!!
 const DICOM_brain = `wadouri:${projectUrl}/DICOM_brain.dcm`;
 const DICOM_spine = `wadouri:${projectUrl}/DICOM_spine.dcm`;

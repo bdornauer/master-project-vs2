@@ -11,7 +11,6 @@ import {Fragment, useEffect, useState} from "react";
 import {Col, Form, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 import configurations from "./DicomViewerDefaultConfiguration"
 import Colors from "../Colors"
-import {load} from "handtrackjs";
 
 /**
  * Loading the tools for the dicom-Viewer containing:
@@ -322,8 +321,9 @@ function DicomViewer(props) {
         setBrightness(defaultLevelValues.brightnessLevel);
         setBrigthnessFactor(defaultLevelValues.brightnessLevel)
 
-        changeSaturation(defaultLevelValues.saturationLevel);
+
         setSaturationLevel(defaultLevelValues.saturationLevel);
+        changeSaturation();
 
         setScaleFactor(defaultLevelValues.zoomLevel);
         zoom(defaultLevelValues.zoomLevel);
@@ -355,6 +355,8 @@ function DicomViewer(props) {
         dicomElement = document.getElementById('dicomImage'); //the view of the the file
         cornerstone.setViewport(dicomElement, viewport);
         cornerstone.updateImage(dicomElement);
+
+        console.log(viewport)
 
         setDefaultLevelValues({
             xPosition: viewport.translation.x,
