@@ -428,10 +428,11 @@ function DicomViewer(props) {
                                 }}
                             >
                                 <option value={configurations.DICOM_brain}>Gehirn</option>
-                                <option value={configurations.PNG_brain}>Gehirn 2</option>
                                 <option value={configurations.DICOM_spine}>Wirbelsäule</option>
+                                <option value={configurations.DICOM_fraction}>Bruch</option>
                                 <option value={configurations.DICOM_spine_section}>Wirbelsäule Querschnitt</option>
                                 <option value={configurations.JPG_Renal_Cell_Carcinoma}>Zell-Karzinom</option>
+                                <option value={configurations.PNG_brain}>Gehirn 2</option>
                             </Form.Select>
                         </Col>
                     </Row>
