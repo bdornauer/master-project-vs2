@@ -94,7 +94,7 @@ export function InformationController() {
                         <td>Farben invertieren</td>
                         <td><span role="img">🇻</span></td>
                         <td><img src={invert} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>...invert"</span></th>
+                        <th><span style={{color: colors.blue}}>...change"</span></th>
 
                     </tr>
                     <tr>

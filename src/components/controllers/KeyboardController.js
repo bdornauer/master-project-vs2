@@ -10,13 +10,13 @@ export function keySelectionCommand(pressedKey) {
         case 'o':
             return ("zoomOut");
         case 'ArrowLeft':
-            return ("goRight");
+            return ("goLeft");
         case 'ArrowUp':
             return ("goUp");
         case 'ArrowDown':
             return ("goDown");
         case 'ArrowRight':
-            return ("goLeft");
+            return ("goRight");
         case 'a':
             return ("turnLeft");
         case 'd':

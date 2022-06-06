@@ -1,4 +1,4 @@
-const grammar = ["mike", "top", "down", "left", "right", "in", "out",
+const grammar = ["mike", "top", "down", "left", "right", "in", "out", "turn",
     "light","density", "increase", "decrease", "invert", "change", "clockwise", "counterclockwise", "counter-clockwise","default"];
 
 export function stringTranscriptToLowerCase(transcript) {
