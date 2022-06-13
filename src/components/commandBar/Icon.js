@@ -15,7 +15,7 @@ function Icon(props) {
                    height: props.height,
                    borderRadius: props.height / 2,
                    background: getColor(props.isActive),
-               }}></Image>
+               }}/>
     );
 }
 

@@ -170,7 +170,7 @@ export function drawGridOverlay(grid, canvasWidth, canvasHeight) {
         ctx.lineTo(canvasWidth, stepsHeight * i);
     }
     ctx.stroke();
-};
+}
 
 /**
  * Filters the two gestures: pinch and open hand
