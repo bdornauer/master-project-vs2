@@ -11,11 +11,11 @@ const config = {
 
 const projectUrl = "http://localhost:3000/sampleMedicalImages"
 //const projectUrl = "https://master-project-vs2.herokuapp.com/sampleMedicalImages";
-//dcm must be small!!!!!
+//dcm must be smal writtenl!!!!!
 const DICOM_brain = `wadouri:${projectUrl}/DICOM_brain.dcm`;
 const DICOM_spine = `wadouri:${projectUrl}/DICOM_spine.dcm`;
 const DICOM_spine_section = `wadouri:${projectUrl}/DICOM_spine_section.dcm`;
-const DICOM_fraction = `${projectUrl}/DICOM_fracture.dcm`;
+const DICOM_fraction = `wadouri:${projectUrl}/DICOM_fracture.dcm`;
 const JPG_Renal_Cell_Carcinoma = `${projectUrl}/JPG_Renal_Cell_Carcinoma.jpeg`;
 const PNG_brain = `${projectUrl}/PNG_brain.png`;
 
