@@ -1,5 +1,4 @@
-import React from 'react';
-import {useState} from "react";
+import React, {useState} from 'react';
 
 import speechIcon from "../assets/logos/speechIcon.svg"
 import keyboardIcon from "../assets/logos/keyboardIcon.svg"
@@ -56,28 +55,28 @@ export function App() {
     ]
 
     let cards = controllers.map((e, index) => (
-            <Card
-                className="Card"
-                style={cardStyle(cardsHover[index])}
-                onMouseEnter={() => {
-                    setCardsHover[index](false)
-                }}
-                onMouseLeave={() => {
-                    setCardsHover[index](true)
-                }}
-                onClick={() => {
+        <Card
+            className="Card"
+            style={cardStyle(cardsHover[index])}
+            onMouseEnter={() => {
+                setCardsHover[index](false)
+            }}
+            onMouseLeave={() => {
+                setCardsHover[index](true)
+            }}
+            onClick={() => {
                 setSelectedModus(e.id);
                 setIsModusActive(true)
             }}
-            >
-                <Card.Img variant="top" src={e.img}/>
-                <Card.Body>
-                    <Card.Title>{e.header}</Card.Title>
-                    <Card.Text style={{textAlign: "left"}}>
-                        {e.body}
-                    </Card.Text>
-                </Card.Body>
-            </Card>
+        >
+            <Card.Img variant="top" src={e.img}/>
+            <Card.Body>
+                <Card.Title>{e.header}</Card.Title>
+                <Card.Text style={{textAlign: "left"}}>
+                    {e.body}
+                </Card.Text>
+            </Card.Body>
+        </Card>
 
     ));
 
@@ -91,7 +90,7 @@ export function App() {
                     <h1>Willkommen beim ersten multimodalen, berührunglosen Dicom-Web-Viewer!</h1>
                     <div>
                         <div className="CardsContainer">
-                            <CardGroup >
+                            <CardGroup>
                                 {cards}
                             </CardGroup>
                         </div>

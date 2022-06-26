@@ -14,12 +14,8 @@ import invert from '../../assets/icons/invert.svg'
 import cancel from '../../assets/icons/cancel.svg'
 import turnLeft from '../../assets/icons/turnLeft.svg'
 import turnRight from "../../assets/icons/turnRight.svg"
-
 import Icon from "./Icon";
-
-//Show
 import css from './CommandBar.css';
-
 
 function CommandBar(props) {
     const iconSetting = {width: 60, height: 60};
@@ -106,17 +102,13 @@ function CommandBar(props) {
         }
     }, [props.selectedCommand])
 
-    function activateButton(name){
+    function activateButton(name) {
         setActiveStatus(prevState => ({...prevState, [name]: true}));
 
-        setTimeout(function(){
-            setActiveStatus(prevState=> ({...prevState, [name]: false}));
+        setTimeout(function () {
+            setActiveStatus(prevState => ({...prevState, [name]: false}));
         }, 500);
     }
-
-
-
-
 
 
     function menuBarTotal() {

@@ -241,7 +241,7 @@ function DicomViewer(props) {
     function navigation(direction, steps) {
         let currentViewport = cornerstone.getViewport(dicomElement);
         let delta = 10 * steps;
-        console.log("Delta: " + delta);
+
         switch (direction) {
             case "goLeft":
                 currentViewport.translation.x -= delta;
@@ -349,14 +349,10 @@ function DicomViewer(props) {
      * Setting a viewport
      * @param viewport
      */
-
-
     function initializeViewport(viewport) {
         dicomElement = document.getElementById('dicomImage'); //the view of the the file
         cornerstone.setViewport(dicomElement, viewport);
         cornerstone.updateImage(dicomElement);
-
-        console.log(viewport)
 
         setDefaultLevelValues({
             xPosition: viewport.translation.x,
@@ -405,58 +401,58 @@ function DicomViewer(props) {
             imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
         }
 
-        loadNewImage(dicomElement,imageId)
+        loadNewImage(dicomElement, imageId)
     }
 
-    useEffect( () => {
+    useEffect(() => {
         dicomElement = document.getElementById('dicomImage'); //the view of the the file
         loadNewImage(dicomElement, defaultImage);
     }, [defaultImage])
 
     return (<Fragment>
-            <div>
-                <Form style={{textAlign: "left"}}>
-                    <Form.Label>Lade eine JPG, PNG oder ein DICOM-File hoch</Form.Label>
-                    <Row>
-                        <Col sm={8}>
-                            <Form.Control type="file" onChange={setNewImage}/>
-                        </Col>
-                        <Col sm={4}>
-                            <Form.Select
-                                onChange={(e) => {
-                                    setDefaultImage(e.target.value)
-                                }}
-                            >
-                                <option value={configurations.DICOM_brain}>Gehirn</option>
-                                <option value={configurations.DICOM_spine}>Wirbelsäule</option>
-                                <option value={configurations.DICOM_fraction}>Bruch</option>
-                                <option value={configurations.DICOM_spine_section}>Wirbelsäule Querschnitt</option>
-                                <option value={configurations.JPG_Renal_Cell_Carcinoma}>Zell-Karzinom</option>
-                                <option value={configurations.PNG_brain}>Gehirn 2</option>
-                            </Form.Select>
-                        </Col>
-                    </Row>
-                </Form>
-                <div id="dicomImage"
-                     onClick={updateValuesOnMouseControl}
-                     onWheelCapture={updateValuesOnMouseControl}
-                     style={{
-                         width: dicomWidth, height: dicomHeight, margin: "10px auto", background: Colors.brightBlue
-                     }}/>
-                <div style={{textAlign: "left"}}>
-                    <ListGroup>
-                        <ListGroupItem>Brightness: {Math.round(brigthnessFactor) / 100} [default: {Math.round(defaultLevelValues.brightnessLevel) / 100}]</ListGroupItem>
-                        <ListGroupItem>Translation: (x: {Math.round(xPositionTranslation)}px,
-                            y: {(-1) * Math.round(yPositionTranslation)}px) [default:
-                            ({defaultLevelValues.xPosition},{defaultLevelValues.yPosition})]</ListGroupItem>
-                        <ListGroupItem>Zoom: {Math.round(scaleFactor * 100) / 100} [default: {Math.round(defaultLevelValues.zoomLevel * 100) / 100} ]</ListGroupItem>
-                        <ListGroupItem>Degree: {Math.round(degreeRotation) % 360}&deg; [default: {Math.round(defaultLevelValues.degreeTurn) / 100}&deg;]</ListGroupItem>
-                        <ListGroupItem>Inverted: {isInverted === false ? "off" : "on"}</ListGroupItem>
-                        <ListGroupItem>Saturation: {Math.round(saturationLevel*100) / 100} (default: {defaultLevelValues.saturationLevel})</ListGroupItem>
-                    </ListGroup>
-                </div>
+        <div>
+            <Form style={{textAlign: "left"}}>
+                <Form.Label>Lade eine JPG, PNG oder ein DICOM-File hoch</Form.Label>
+                <Row>
+                    <Col sm={8}>
+                        <Form.Control type="file" onChange={setNewImage}/>
+                    </Col>
+                    <Col sm={4}>
+                        <Form.Select
+                            onChange={(e) => {
+                                setDefaultImage(e.target.value)
+                            }}
+                        >
+                            <option value={configurations.DICOM_brain}>Gehirn</option>
+                            <option value={configurations.DICOM_spine}>Wirbelsäule</option>
+                            <option value={configurations.DICOM_fraction}>Bruch</option>
+                            <option value={configurations.DICOM_spine_section}>Wirbelsäule Querschnitt</option>
+                            <option value={configurations.JPG_Renal_Cell_Carcinoma}>Zell-Karzinom</option>
+                            <option value={configurations.PNG_brain}>Gehirn 2</option>
+                        </Form.Select>
+                    </Col>
+                </Row>
+            </Form>
+            <div id="dicomImage"
+                 onClick={updateValuesOnMouseControl}
+                 onWheelCapture={updateValuesOnMouseControl}
+                 style={{
+                     width: dicomWidth, height: dicomHeight, margin: "10px auto", background: Colors.brightBlue
+                 }}/>
+            <div style={{textAlign: "left"}}>
+                <ListGroup>
+                    <ListGroupItem>Brightness: {Math.round(brigthnessFactor) / 100} [default: {Math.round(defaultLevelValues.brightnessLevel) / 100}]</ListGroupItem>
+                    <ListGroupItem>Translation: (x: {Math.round(xPositionTranslation)}px,
+                        y: {(-1) * Math.round(yPositionTranslation)}px) [default:
+                        ({defaultLevelValues.xPosition},{defaultLevelValues.yPosition})]</ListGroupItem>
+                    <ListGroupItem>Zoom: {Math.round(scaleFactor * 100) / 100} [default: {Math.round(defaultLevelValues.zoomLevel * 100) / 100} ]</ListGroupItem>
+                    <ListGroupItem>Degree: {Math.round(degreeRotation) % 360}&deg; [default: {Math.round(defaultLevelValues.degreeTurn) / 100}&deg;]</ListGroupItem>
+                    <ListGroupItem>Inverted: {isInverted === false ? "off" : "on"}</ListGroupItem>
+                    <ListGroupItem>Saturation: {Math.round(saturationLevel * 100) / 100} (default: {defaultLevelValues.saturationLevel})</ListGroupItem>
+                </ListGroup>
             </div>
-        </Fragment>);
+        </div>
+    </Fragment>);
 }
 
 export default DicomViewer;

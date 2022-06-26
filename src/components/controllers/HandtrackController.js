@@ -29,8 +29,6 @@ import Colors from "../Colors";
  * 1: topLeft 2:topCenter 3:topRight;
  * 4: centerLeft 5:centerCenter 6:centerRight
  * 7: bottomLeft 8:bottomCenter 9:bottomRight
- */
-/**
  *
  * @param xPosition
  * @param yPosition

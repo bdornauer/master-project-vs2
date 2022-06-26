@@ -9,15 +9,15 @@ import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition'
 import confirmSound from "../assets/confirmSound.wav"
 
 import {
-    filterPinchAndOpenHandGesture,
     calculateCenterOfBBox,
     containsPrediction,
-    positionInGrid,
+    drawGridOverlay,
     drawIconsMenu1,
     drawIconsMenu2,
-    drawGridOverlay,
-    removeCanvasLayer,
-    highlightSectionActive
+    filterPinchAndOpenHandGesture,
+    highlightSectionActive,
+    positionInGrid,
+    removeCanvasLayer
 } from "./controllers/HandtrackController";
 
 import {keySelectionCommand, supressKey} from "./controllers/KeyboardController";
@@ -26,8 +26,8 @@ import {
     extractFirstNumberInStringArray,
     filterCommands,
     setCommandFromVoiceCommand,
-    transcriptToWordArray,
-    stringTranscriptToLowerCase
+    stringTranscriptToLowerCase,
+    transcriptToWordArray
 } from "./controllers/SpeechController";
 
 import {InformationController} from "./informationController/InformationController";
@@ -206,7 +206,7 @@ export function WebController(props) {
 
         // min. 300 ms for normal command
         // min. 500 ms for menu interchange
-        if (timePassed > 300 && ! (gridSection==="centerCenter" && timePassed < 500) ) {
+        if (timePassed > 300 && !(gridSection === "centerCenter" && timePassed < 500)) {
             startTime = performance.now();
             timePassed = 0
             if (activeMenuNr === 1) {
@@ -364,7 +364,11 @@ export function WebController(props) {
 
                     <div style={{position: "relative"}}>
                         <div style={{
-                            position: "relative", width: webcamWidth, height: webcamHeight, left: "50%", transform: "translateX(-50%)"
+                            position: "relative",
+                            width: webcamWidth,
+                            height: webcamHeight,
+                            left: "50%",
+                            transform: "translateX(-50%)"
                         }}>
                             <video ref={video} width={webcamWidth} height={webcamHeight} style={{
                                 position: "relative", width: webcamWidth, height: webcamHeight, top: "0", left: "0"

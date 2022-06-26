@@ -14,11 +14,10 @@ import invert from "../../assets/icons/invert.svg";
 import cancel from "../../assets/icons/cancel.svg";
 import turnLeft from "../../assets/icons/turnLeft.svg";
 import turnRight from "../../assets/icons/turnRight.svg";
-import  "./InformationController.css";
+import "./InformationController.css";
 
 export function InformationController() {
-    return (
-        <div>
+    return (<div>
             <div>
                 <Table striped hover size="sm" style={{fontSize: "22px"}} responsive={true}>
                     <thead style={{backgroundColor: colors.brightBlue}}>
@@ -107,18 +106,20 @@ export function InformationController() {
                         <td>Links drehen</td>
                         <td><span role="img">🇦</span></td>
                         <td><img src={turnLeft} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>... [levels]turn counterclockwise</span>(1 level = 30 Grad)</th>
+                        <th><span style={{color: colors.blue}}>... [levels]turn counterclockwise</span>(1 level = 30
+                            Grad)
+                        </th>
                     </tr>
                     <tr>
                         <td>Rechts drehen</td>
                         <td><span role="img">🇩️</span></td>
                         <td><img src={turnRight} width="40em" alt="React Logo"/></td>
-                        <th><span style={{color: colors.blue}}>... [levels] turn clockwise"</span>(1 level = 30 Grad)</th>
+                        <th><span style={{color: colors.blue}}>... [levels] turn clockwise"</span>(1 level = 30 Grad)
+                        </th>
                     </tr>
                     </tbody>
                 </Table>
             </div>
-        </div>
-    );
+        </div>);
 }
 
